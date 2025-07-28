@@ -1,0 +1,15 @@
+server:
+  port: 4000
+
+spring:
+  profiles:
+    default: local
+
+  application:
+    name: artcorner
+
+  config:
+    import:
+      - security/application-db.yml
+      - security/application-jwt.yml
+      - security/application-oauth.yml
