@@ -1,0 +1,22 @@
+server:
+  port: 443
+  ssl:
+    enabled: true
+    key-store: file:/home/ubuntu/keystore.p12
+    key-store-password: ${SSL_SECRET}
+    key-store-type: PKCS12
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/artcorner
+    username: prod_user
+    password: prod_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
