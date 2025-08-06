@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,11 +25,16 @@ import thonlivethondie.artconnect.filter.CustomJsonUsernamePasswordAuthenticatio
 import thonlivethondie.artconnect.filter.JwtAuthenticationProcessingFilter;
 import thonlivethondie.artconnect.handler.LoginFailureHandler;
 import thonlivethondie.artconnect.handler.LoginSuccessHandler;
+import thonlivethondie.artconnect.oauth2.handler.OAuth2LoginFailureHandler;
+import thonlivethondie.artconnect.oauth2.handler.OAuth2LoginSuccessHandler;
+import thonlivethondie.artconnect.oauth2.service.CustomOAuth2UserService;
 import thonlivethondie.artconnect.repository.UserRepository;
 import thonlivethondie.artconnect.service.JwtService;
 import thonlivethondie.artconnect.service.LoginService;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -38,6 +45,10 @@ public class SecurityConfig {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -75,9 +86,35 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
 
+                // 소셜 로그인 설정
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
+                )
+
                 // 필터 순서 설정
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
-                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
+
+                // 인증되지 않은 요청에 대한 JSON 응답 처리
+                .exceptionHandling(exceptionHandling -> exceptionHandling
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("UTF-8");
+
+                            Map<String, Object> errorResponse = new HashMap<>();
+                            errorResponse.put("success", false);
+                            errorResponse.put("message", "인증이 필요합니다. 로그인 후 다시 시도해주세요.");
+                            errorResponse.put("error", "UNAUTHORIZED");
+                            errorResponse.put("status", HttpStatus.UNAUTHORIZED.value());
+
+                            String jsonResponse = objectMapper.writeValueAsString(errorResponse);
+                            response.getWriter().write(jsonResponse);
+                        }));
 
         return http.build();
     }
@@ -85,7 +122,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://wonokim.iptime.org:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -107,7 +144,6 @@ public class SecurityConfig {
      * FormLogin(기존 스프링 시큐리티 로그인)과 동일하게 DaoAuthenticationProvider 사용
      * UserDetailsService는 커스텀 LoginService로 등록
      * 또한, FormLogin과 동일하게 AuthenticationManager로는 구현체인 ProviderManager 사용(return ProviderManager)
-     *
      */
     @Bean
     public AuthenticationManager authenticationManager() {
