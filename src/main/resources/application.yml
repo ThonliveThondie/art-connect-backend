@@ -1,12 +1,12 @@
 server:
-  port: 4000
+  port: 8080
 
 spring:
   profiles:
     default: local
 
   application:
-    name: artcorner
+    name: artconnect
 
   config:
     import:
