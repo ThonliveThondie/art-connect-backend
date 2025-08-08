@@ -35,10 +35,10 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         try {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-            String email = oAuth2User.getEmail();
+            Long userId = oAuth2User.getUserId();
 
             // AccessToken과 RefreshToken 생성
-            String accessToken = jwtService.createAccessToken(email);
+            String accessToken = jwtService.createAccessToken(userId);
             String refreshToken = jwtService.createRefreshToken();
 
             // 응답 헤더에 토큰 추가
@@ -49,7 +49,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
 
             // RefreshToken을 데이터베이스에 저장
-            userRepository.findByEmail(email)
+            userRepository.findById(userId)
                     .ifPresent(user -> {
                         user.updateRefreshToken(refreshToken);
                         userRepository.saveAndFlush(user);
@@ -62,7 +62,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
             response.sendRedirect(redirectUrl);
 
-            log.info("OAuth2 로그인에 성공하였습니다. 이메일 : {}", email);
+            log.info("OAuth2 로그인에 성공하였습니다. userId : {}", userId);
             log.info("OAuth2 로그인에 성공하였습니다. AccessToken : {}", accessToken);
             log.info("발급된 AccessToken 만료 기간 : {}", accessTokenExpiration);
 

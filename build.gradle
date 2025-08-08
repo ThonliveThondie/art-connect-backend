@@ -48,6 +48,18 @@ dependencies {
 
 	//Spring OAuth 2.0
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// WebSocket & STOMP 지원
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	// WebSocket Security
+	implementation 'org.springframework.security:spring-security-messaging'
+
+	//Querydsl 추가
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
 
 tasks.named('test') {

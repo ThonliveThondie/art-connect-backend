@@ -9,9 +9,9 @@ import thonlivethondie.artconnect.oauth2.userinfo.GoogleOAuth2UserInfo;
 import thonlivethondie.artconnect.oauth2.userinfo.KakaoOAuth2UserInfo;
 import thonlivethondie.artconnect.oauth2.userinfo.NaverOAuth2UserInfo;
 import thonlivethondie.artconnect.oauth2.userinfo.OAuth2UserInfo;
+import thonlivethondie.artconnect.util.NicknameGenerator;
 
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * 각 소셜에서 받아오는 데이터가 다르므로
@@ -81,10 +81,13 @@ public class OAuthAttributes {
             email = oauth2UserInfo.getId() + "@" + socialType.name().toLowerCase() + ".social";
         }
 
+        String generatedNickname = NicknameGenerator.generateRandomNickname();
+
         return User.builder()
                 .socialType(socialType)
                 .socialId(oauth2UserInfo.getId())
                 .email(email)
+                .nickname(generatedNickname)
                 .imageUrl(oauth2UserInfo.getImageUrl())
                 .role(Role.USER)
                 .build();
