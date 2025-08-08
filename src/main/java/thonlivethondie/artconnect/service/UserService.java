@@ -11,6 +11,7 @@ import thonlivethondie.artconnect.common.exception.ErrorCode;
 import thonlivethondie.artconnect.dto.SignUpRequestDto;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.repository.UserRepository;
+import thonlivethondie.artconnect.util.NicknameGenerator;
 
 @Slf4j
 @Service
@@ -28,9 +29,12 @@ public class UserService {
             throw new BadRequestException(ErrorCode.EMAIL_DUPLICATED);
         }
 
+        String generatedNickname = NicknameGenerator.generateRandomNickname();
+
         User user = User.builder()
                 .email(dto.email())
                 .password(encodePassword)
+                .nickname(generatedNickname)
                 .role(Role.USER)
                 .userType(dto.userType())
                 .build();
