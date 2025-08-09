@@ -25,10 +25,10 @@ public class Store extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "store_name", nullable = false, length = 100)
+    @Column(name = "store_name", length = 100)
     private String storeName;
 
-    @Column(name = "address", nullable = false)
+    @Column(name = "address")
     private String address;
 
     @Column(name = "phone_number", length = 20)
@@ -42,7 +42,7 @@ public class Store extends BaseEntity {
 
     @Builder
     public Store(User user, String storeName, String address, String phoneNumber, String operatingHours) {
-        
+
         // 소상공인만 매장을 생성할 수 있는 검증 로직
         if (user.getUserType() != UserType.BUSINESS_OWNER) {
             throw new IllegalArgumentException("매장은 소상공인만 생성할 수 있습니다.");
@@ -56,9 +56,17 @@ public class Store extends BaseEntity {
     }
 
     public void updateStoreInfo(String storeName, String address, String phoneNumber, String operatingHours) {
-        this.storeName = storeName;
-        this.address = address;
-        this.phoneNumber = phoneNumber;
-        this.operatingHours = operatingHours;
+        if (storeName != null) {
+            this.storeName = storeName;
+        }
+        if (address != null) {
+            this.address = address;
+        }
+        if (phoneNumber != null) {
+            this.phoneNumber = phoneNumber;
+        }
+        if (operatingHours != null) {
+            this.operatingHours = operatingHours;
+        }
     }
 }
