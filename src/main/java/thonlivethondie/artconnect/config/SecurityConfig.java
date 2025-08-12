@@ -79,9 +79,7 @@ public class SecurityConfig {
                                 "/images/**",
                                 "/js/**",
                                 "/h2-console/**",
-                                "/api/v1/**",
-                                "/ws",
-                                "/ws/**"
+                                "/api/v1/**"
                         ).permitAll()
 
                         // 나머지 모든 요청은 인증 필요

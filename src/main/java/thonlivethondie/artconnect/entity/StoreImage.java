@@ -39,8 +39,14 @@ public class StoreImage extends BaseEntity {
     }
 
     public void updateImageInfo(String imageUrl, Integer imageOrder, Boolean isMain) {
-        this.imageUrl = imageUrl;
-        this.imageOrder = imageOrder;
-        this.isMain = isMain;
+        if (imageUrl != null) {
+            this.imageUrl = imageUrl;
+        }
+        if (imageOrder != null) {
+            this.imageOrder = imageOrder;
+        }
+        if (isMain != null) {
+            this.isMain = isMain;
+        }
     }
 }

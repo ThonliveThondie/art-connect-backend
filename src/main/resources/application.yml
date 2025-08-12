@@ -2,6 +2,14 @@ server:
   port: 8080
 
 spring:
+  ai:
+    anthropic:
+      api-key: ${local-ai.anthropic.claude.api-key}
+      chat:
+        options:
+          model: ${local-ai.anthropic.claude.chat.options.model}
+          temperature: ${local-ai.anthropic.claude.chat.options.temperature}
+
   profiles:
     default: local
 
@@ -13,3 +21,5 @@ spring:
       - security/application-db.yml
       - security/application-jwt.yml
       - security/application-oauth.yml
+      - security/application-awss3.yml
+      - security/application-ai.yml
