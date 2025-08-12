@@ -6,12 +6,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import thonlivethondie.artconnect.common.Role;
+import thonlivethondie.artconnect.common.UserType;
 import thonlivethondie.artconnect.common.exception.BadRequestException;
 import thonlivethondie.artconnect.common.exception.ErrorCode;
+import thonlivethondie.artconnect.dto.DesignerInfoRequestDto;
 import thonlivethondie.artconnect.dto.SignUpRequestDto;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.repository.UserRepository;
 import thonlivethondie.artconnect.util.NicknameGenerator;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -40,5 +44,19 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void updateDesignerInfo(Long userId, DesignerInfoRequestDto dto) {
+
+        Optional<User> existingDesigner = userRepository.findById(userId);
+
+        User designer;
+
+        if (existingDesigner.isPresent()) {
+            designer = existingDesigner.get();
+
+            designer.updateDesignerInfo(dto.education(), dto.major(), dto.specialty());
+        }
     }
 }

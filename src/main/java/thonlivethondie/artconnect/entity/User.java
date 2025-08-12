@@ -10,9 +10,13 @@ import thonlivethondie.artconnect.common.Role;
 import thonlivethondie.artconnect.common.SocialType;
 import thonlivethondie.artconnect.common.UserType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "users")
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,7 +36,7 @@ public class User extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    //-- 디자이너인 경우 학력전공, 전문분야를 추가로 필드를 가짐 -- //
+    //-- 디자이너인 경우 education, major, specialty를 추가로 필드를 가짐 -- //
     @Column(name = "education")
     private String education;
 
@@ -57,6 +61,10 @@ public class User extends BaseEntity {
     private String imageUrl;
 
     private String refreshToken;
+
+    // 디자이너인 경우 포트폴리오 목록
+    @OneToMany(mappedBy = "designer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Portfolio> portfolios = new ArrayList<>();
 
     @Builder
     public User(String email,
@@ -87,5 +95,19 @@ public class User extends BaseEntity {
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public void updateDesignerInfo(String education, String major, String specialty) {
+        if (education != null) {
+            this.education = education;
+        }
+
+        if (major != null) {
+            this.major = major;
+        }
+
+        if (specialty != null) {
+            this.specialty = specialty;
+        }
     }
 }
