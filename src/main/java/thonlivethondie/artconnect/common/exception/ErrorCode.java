@@ -19,6 +19,8 @@ public enum ErrorCode {
     DUPLICATE_STORE_NAME(BAD_REQUEST, "S003", "이미 존재하는 매장명입니다."),
     STORE_NOT_FOUND(BAD_REQUEST, "S004", "매장을 찾을 수 없습니다."),
     STORE_ACCESS_DENIED(BAD_REQUEST,"S005", "해당 매장에 접근할 권한이 없습니다."),
+    STORE_IMAGE_NOT_FOUND(BAD_REQUEST, "S006", "매장 이미지를 찾을 수 없습니다."),
+    STORE_IMAGE_ACCESS_DENIED(BAD_REQUEST, "S007", "해당 매장 이미지에 접근할 권한이 없습니다."),
     
     // 작업의뢰서 관련 에러
     WORK_REQUEST_NOT_FOUND(BAD_REQUEST,"W001", "작업의뢰서를 찾을 수 없습니다."),
