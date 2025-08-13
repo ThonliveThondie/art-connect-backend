@@ -12,19 +12,18 @@ public enum ErrorCode {
     
     // 사용자 관련 에러
     USER_NOT_FOUND(BAD_REQUEST, "U001", "사용자를 찾을 수 없습니다."),
-    
-    // 채팅방 관련 에러
-    CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "C001", "채팅방을 찾을 수 없습니다."),
-    CHAT_ROOM_ACCESS_DENIED(BAD_REQUEST, "C002", "채팅방에 접근할 권한이 없습니다."),
-    
-    // 메시지 관련 에러
-    PARENT_MESSAGE_NOT_FOUND(BAD_REQUEST, "M001", "부모 메시지를 찾을 수 없습니다."),
 
     // 매장 관련 에러
-    INVALID_USER_TYPE(BAD_REQUEST, "S001", "소상공인만 매장을 생성할 수 있습니다."),
+    INVALID_USER_TYPE(BAD_REQUEST, "S001", "사용자 유형이 올바르지 않습니다."),
     ALREADY_HAS_STORE(BAD_REQUEST, "S002", "이미 매장을 보유하고 있습니다."),
     DUPLICATE_STORE_NAME(BAD_REQUEST, "S003", "이미 존재하는 매장명입니다."),
     STORE_NOT_FOUND(BAD_REQUEST, "S004", "매장을 찾을 수 없습니다."),
+    STORE_ACCESS_DENIED(BAD_REQUEST,"S005", "해당 매장에 접근할 권한이 없습니다."),
+    
+    // 작업의뢰서 관련 에러
+    WORK_REQUEST_NOT_FOUND(BAD_REQUEST,"W001", "작업의뢰서를 찾을 수 없습니다."),
+    WORK_REQUEST_ACCESS_DENIED(BAD_REQUEST,"W002", "작업의뢰서에 접근할 권한이 없습니다."),
+    IMAGE_UPLOAD_FAILED(BAD_REQUEST,"I001", "이미지 업로드에 실패했습니다."),
     
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "E999", "서버 내부 오류가 발생했습니다.");
 

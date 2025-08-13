@@ -1,5 +1,8 @@
 package thonlivethondie.artconnect.common;
 
+import lombok.Getter;
+
+@Getter
 public enum UserType {
     BUSINESS_OWNER("소상공인"),
     DESIGNER("디자이너");
@@ -8,9 +11,5 @@ public enum UserType {
 
     UserType(String description) {
         this.description = description;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }
