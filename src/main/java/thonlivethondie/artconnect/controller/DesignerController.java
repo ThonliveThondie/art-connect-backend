@@ -13,13 +13,13 @@ import thonlivethondie.artconnect.dto.DesignerInfoRequestDto;
 import thonlivethondie.artconnect.service.UserService;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/designer")
 @RequiredArgsConstructor
 public class DesignerController {
 
     private final UserService userService;
 
-    @PostMapping("/designer/profiles")
+    @PostMapping("/profiles")
     public ResponseEntity<Void> myProfile(@AuthenticationPrincipal UserDetails userDetails,
                                           @RequestBody DesignerInfoRequestDto requestBody) {
 

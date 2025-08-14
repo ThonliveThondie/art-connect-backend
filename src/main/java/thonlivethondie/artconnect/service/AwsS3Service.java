@@ -28,9 +28,9 @@ public class AwsS3Service {
     private final AmazonS3 amazonS3;
 
     public List<String> uploadFile(List<MultipartFile> multipartFiles) {
-        List<String> fileNameList = new ArrayList<>();
+        List<String> fileUrlList = new ArrayList<>();
 
-        // forEach 구문을 통해 multipartFiles 리스트로 넘어온 파일들을 순차적으로 fileNameList 에 추가
+        // forEach 구문을 통해 multipartFiles 리스트로 넘어온 파일들을 순차적으로 fileUrlList 에 추가
         multipartFiles.forEach(file -> {
             String fileName = createFileName(file.getOriginalFilename());
             ObjectMetadata objectMetadata = new ObjectMetadata();
@@ -43,11 +43,14 @@ public class AwsS3Service {
             } catch (IOException e) {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
             }
-            fileNameList.add(fileName);
+            
+            // S3 URL 생성하여 추가
+            String fileUrl = amazonS3.getUrl(bucket, fileName).toString();
+            fileUrlList.add(fileUrl);
 
         });
 
-        return fileNameList;
+        return fileUrlList;
     }
 
     // 파일명을 난수화하기 위해 UUID 를 활용하여 난수를 돌린다.

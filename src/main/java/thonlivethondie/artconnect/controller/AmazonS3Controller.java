@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/file")
+@RequestMapping("/api/amazons3/file")
 public class AmazonS3Controller {
 
     private final AwsS3Service awsS3Service;
