@@ -21,32 +21,39 @@ public class StoreImage extends BaseEntity {
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
+    @Column(name = "image_name")
+    private String imageName;
+
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
-    @Column(name = "image_order")
-    private Integer imageOrder;
+    @Column(name = "image_size")
+    private Long imageSize;
 
-    @Column(name = "is_main")
-    private Boolean isMain;
+    @Column(name = "image_type")
+    private String imageType;
 
     @Builder
-    public StoreImage(Store store, String imageUrl, Integer imageOrder, Boolean isMain) {
+    public StoreImage(Store store, String imageName, String imageUrl, Long imageSize, String imageType) {
         this.store = store;
+        this.imageName = imageName;
         this.imageUrl = imageUrl;
-        this.imageOrder = imageOrder;
-        this.isMain = isMain;
+        this.imageSize = imageSize;
+        this.imageType = imageType;
     }
 
-    public void updateImageInfo(String imageUrl, Integer imageOrder, Boolean isMain) {
+    public void updateImageInfo(String imageName, String imageUrl, Long imageSize, String imageType) {
+        if (imageName != null) {
+            this.imageName = imageName;
+        }
         if (imageUrl != null) {
             this.imageUrl = imageUrl;
         }
-        if (imageOrder != null) {
-            this.imageOrder = imageOrder;
+        if (imageSize != null) {
+            this.imageSize = imageSize;
         }
-        if (isMain != null) {
-            this.isMain = isMain;
+        if (imageType != null) {
+            this.imageType = imageType;
         }
     }
 }

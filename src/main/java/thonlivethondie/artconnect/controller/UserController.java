@@ -11,7 +11,7 @@ import thonlivethondie.artconnect.dto.SignUpRequestDto;
 import thonlivethondie.artconnect.service.UserService;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
