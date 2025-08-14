@@ -58,9 +58,21 @@ public class User extends BaseEntity {
 
     private String socialId;
 
+    private String refreshToken;
+
+    // 사용자 프로필 이미지
+    @Column(name = "image_name")
+    private String imageName;
+
+    @Column(name = "image_url")
     private String imageUrl;
 
-    private String refreshToken;
+    @Column(name = "image_size")
+    private Long imageSize;
+
+    @Column(name = "image_type")
+    private String imageType;
+
 
     // 디자이너인 경우 포트폴리오 목록
     @OneToMany(mappedBy = "designer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -98,16 +110,41 @@ public class User extends BaseEntity {
     }
 
     public void updateDesignerInfo(String education, String major, String specialty) {
-        if (education != null) {
+        if (education != null && !education.trim().isEmpty()) {
             this.education = education;
         }
 
-        if (major != null) {
+        if (major != null && !major.trim().isEmpty()) {
             this.major = major;
         }
 
-        if (specialty != null) {
+        if (specialty != null && !specialty.trim().isEmpty()) {
             this.specialty = specialty;
+        }
+    }
+
+    public void updateNickname(String nickname) {
+        if (nickname != null && !nickname.trim().isEmpty()) {
+            this.nickname = nickname;
+        }
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void updateProfileImage(String imageName, String imageUrl, Long imageSize, String imageType) {
+        if (imageName != null && !imageName.trim().isEmpty()) {
+            this.imageName = imageName;
+        }
+        if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            this.imageUrl = imageUrl;
+        }
+        if (imageSize != null) {
+            this.imageSize = imageSize;
+        }
+        if (imageType != null && !imageType.trim().isEmpty()) {
+            this.imageType = imageType;
         }
     }
 }

@@ -58,6 +58,7 @@ public class Store extends BaseEntity {
     public void updateStoreInfo(String storeName, String address, String phoneNumber, String operatingHours) {
         if (storeName != null) {
             this.storeName = storeName;
+            this.user.updateNickname(storeName);
         }
         if (address != null) {
             this.address = address;
