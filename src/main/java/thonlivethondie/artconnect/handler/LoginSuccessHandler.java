@@ -1,5 +1,6 @@
 package thonlivethondie.artconnect.handler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -8,14 +9,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import thonlivethondie.artconnect.dto.LoginSuccessResponse;
 import thonlivethondie.artconnect.repository.UserRepository;
 import thonlivethondie.artconnect.service.JwtService;
+
+import java.io.IOException;
 
 @Slf4j
 @RequiredArgsConstructor
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final ObjectMapper objectMapper;
 
     @Value("${jwt.access.expiration}")
     private String accessTokenExpiration;
@@ -35,6 +40,21 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                 .ifPresent(user -> {
                     user.updateRefreshToken(refreshToken);
                     userRepository.saveAndFlush(user);
+
+                    // JSON 응답 추가
+                    try {
+                        LoginSuccessResponse loginSuccessResponse = new LoginSuccessResponse(
+                                user.getId(),
+                                user.getUserType(),
+                                "로그인 성공"
+                        );
+
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.getWriter().write(objectMapper.writeValueAsString(loginSuccessResponse));
+                    } catch (IOException e) {
+                        log.error("JSON 응답 생성 중 오류 발생", e);
+                    }
                 });
         log.info("로그인에 성공하였습니다. userId : {}", userId);
         log.info("로그인에 성공하였습니다. AccessToken : {}", accessToken);
