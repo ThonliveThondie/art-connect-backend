@@ -146,7 +146,12 @@ public class DesignerMatchingService {
         RecommendedDesignerDto dto = new RecommendedDesignerDto();
         dto.setUserId(user.getId());
         dto.setNickname(user.getNickname());
-        dto.setSpecialty(user.getSpecialty());
+        // 전문분야 목록을 문자열로 변환
+        String specialtiesStr = user.getSelectedSpecialities().stream()
+                .map(category -> category.getDescription())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("");
+        dto.setSpecialty(specialtiesStr);
         dto.setProfileImageUrl(user.getImageUrl());
 
         // 경력과 평점은 현재 User 엔티티에 없으므로 기본값 설정

@@ -5,13 +5,11 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import thonlivethondie.artconnect.common.BaseEntity;
-import thonlivethondie.artconnect.common.Role;
-import thonlivethondie.artconnect.common.SocialType;
-import thonlivethondie.artconnect.common.UserType;
+import thonlivethondie.artconnect.common.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -36,15 +34,20 @@ public class User extends BaseEntity {
     @Column(name = "phone_number")
     private String phoneNumber;
 
-    //-- 디자이너인 경우 education, major, specialty를 추가로 필드를 가짐 -- //
+    //-- 디자이너인 경우 education, major, speciality를 추가로 필드를 가짐 -- //
     @Column(name = "education")
     private String education;
 
     @Column(name = "major")
     private String major;
 
-    @Column(name = "specialty")
-    private String specialty;
+    // 전문분야 카테고리들 (최대 3개)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserDesignCategory> speciality = new ArrayList<>();
+
+    // 디자인 스타일 카테고리들 (최대 3개)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserDesignStyleCategory> designStyleCategories = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -73,7 +76,6 @@ public class User extends BaseEntity {
     @Column(name = "image_type")
     private String imageType;
 
-
     // 디자이너인 경우 포트폴리오 목록
     @OneToMany(mappedBy = "designer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Portfolio> portfolios = new ArrayList<>();
@@ -85,7 +87,6 @@ public class User extends BaseEntity {
                 String nickname,
                 String education,
                 String major,
-                String specialty,
                 Role role,
                 SocialType socialType,
                 UserType userType,
@@ -96,7 +97,6 @@ public class User extends BaseEntity {
         this.password = password;
         this.education = education;
         this.major = major;
-        this.specialty = specialty;
         this.nickname = nickname;
         this.role = role;
         this.socialType = socialType;
@@ -109,7 +109,21 @@ public class User extends BaseEntity {
         this.refreshToken = refreshToken;
     }
 
-    public void updateDesignerInfo(String education, String major, String specialty) {
+    // 전문분야 목록 조회
+    public List<DesignCategory> getSelectedSpecialities() {
+        return this.speciality.stream()
+                .map(UserDesignCategory::getDesignCategory)
+                .collect(Collectors.toList());
+    }
+
+    // 디자인 스타일 목록 조회
+    public List<DesignStyle> getSelectedDesignStyles() {
+        return this.designStyleCategories.stream()
+                .map(UserDesignStyleCategory::getDesignStyle)
+                .collect(Collectors.toList());
+    }
+
+    public void updateDesignerInfo(String education, String major) {
         if (education != null && !education.trim().isEmpty()) {
             this.education = education;
         }
@@ -117,9 +131,15 @@ public class User extends BaseEntity {
         if (major != null && !major.trim().isEmpty()) {
             this.major = major;
         }
+    }
 
-        if (specialty != null && !specialty.trim().isEmpty()) {
-            this.specialty = specialty;
+    public void updateBasicInfo(String nickname, String phoneNumber) {
+        if (nickname != null && !nickname.trim().isEmpty()) {
+            this.nickname = nickname;
+        }
+
+        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            this.phoneNumber = phoneNumber;
         }
     }
 
@@ -127,10 +147,6 @@ public class User extends BaseEntity {
         if (nickname != null && !nickname.trim().isEmpty()) {
             this.nickname = nickname;
         }
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
     }
 
     public void updateProfileImage(String imageName, String imageUrl, Long imageSize, String imageType) {

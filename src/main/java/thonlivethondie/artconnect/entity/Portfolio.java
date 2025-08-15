@@ -6,11 +6,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import thonlivethondie.artconnect.common.BaseEntity;
+import thonlivethondie.artconnect.common.DesignCategory;
 import thonlivethondie.artconnect.common.UserType;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Entity
@@ -26,37 +27,27 @@ public class Portfolio extends BaseEntity {
     @JoinColumn(name = "designer_id", nullable = false)
     private User designer;
 
-    // 매장과의 연관관계 (소상공인의 매장)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id")
-    private Store store;
-
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
-    @Column(name = "category", nullable = false)
-    private String category;
-
-    @Column(name = "project_duration")
-    private String projectDuration;
-
-    @Column(name = "thumbnail_url")
-    private String thumbnailUrl; // 썸네일 이미지 URL
+    // 포트폴리오 디자인 카테고리들 (최대 3개)
+    @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PortfolioDesignCategory> designCategories = new ArrayList<>();
 
     // 포트폴리오 이미지들
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PortfolioImage> portfolioImages = new ArrayList<>();
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "thumbnail_url")
+    private String thumbnailUrl; // 썸네일 이미지 URL
+
     @Builder
     public Portfolio(User designer,
-                     Store store,
                      String title,
                      String description,
-                     String category,
-                     String projectDuration,
                      String thumbnailUrl) {
 
         // 디자이너만 포트폴리오를 생성할 수 있는 검증 로직
@@ -65,11 +56,61 @@ public class Portfolio extends BaseEntity {
         }
 
         this.designer = designer;
-        this.store = store;
         this.title = title;
         this.description = description;
-        this.category = category;
-        this.projectDuration = projectDuration;
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    /**
+     * 연관관계 편의 메서드
+     */
+    // 디자인 카테고리 일괄 설정
+    public void setDesignCategories(List<DesignCategory> categories) {
+        if (categories.size() > 3) {
+            throw new IllegalArgumentException("최대 3개의 디자인 카테고리만 선택할 수 있습니다.");
+        }
+
+        // 기존 카테고리 모두 제거
+        this.designCategories.clear();
+
+        // 새 카테고리들 추가
+        for (DesignCategory category : categories) {
+            this.addDesignCategory(category);
+        }
+    }
+
+    // 디자인 카테고리 추가 메서드
+    public void addDesignCategory(DesignCategory category) {
+        if (this.designCategories.size() >= 3) {
+            throw new IllegalArgumentException("최대 3개의 디자인 카테고리만 선택할 수 있습니다.");
+        }
+
+        // 중복 체크
+        boolean exists = this.designCategories.stream()
+                .anyMatch(dc -> dc.getDesignCategory() == category);
+
+        if (exists) {
+            throw new IllegalArgumentException("이미 선택된 디자인 카테고리입니다.");
+        }
+
+        PortfolioDesignCategory portfolioDesignCategory =
+                PortfolioDesignCategory.builder()
+                        .portfolio(this)
+                        .designCategory(category)
+                        .build();
+
+        this.designCategories.add(portfolioDesignCategory);
+    }
+
+    // 디자인 카테고리 제거 메서드
+    public void removeDesignCategory(DesignCategory category) {
+        this.designCategories.removeIf(dc -> dc.getDesignCategory() == category);
+    }
+
+    // 디자인 카테고리 목록 조회
+    public List<DesignCategory> getSelectedDesignCategories() {
+        return this.designCategories.stream()
+                .map(PortfolioDesignCategory::getDesignCategory)
+                .collect(Collectors.toList());
     }
 }
