@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +27,14 @@ public class AwsS3Service {
     private String bucket;
 
     private final AmazonS3 amazonS3;
+
+    public String uploadFile(MultipartFile file) {
+        List<String> urls = uploadFile(Collections.singletonList(file));
+        if (urls == null || urls.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다.");
+        }
+        return urls.get(0); // 첫 번째 URL 반환
+    }
 
     public List<String> uploadFile(List<MultipartFile> multipartFiles) {
         List<String> fileUrlList = new ArrayList<>();

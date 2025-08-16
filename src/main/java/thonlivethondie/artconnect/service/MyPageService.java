@@ -1,11 +1,15 @@
 package thonlivethondie.artconnect.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import thonlivethondie.artconnect.common.DesignCategory;
 import thonlivethondie.artconnect.common.DesignStyle;
 import thonlivethondie.artconnect.common.UserType;
+import thonlivethondie.artconnect.common.exception.BadRequestException;
+import thonlivethondie.artconnect.common.exception.ErrorCode;
 import thonlivethondie.artconnect.dto.*;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.entity.UserDesignCategory;
@@ -13,9 +17,11 @@ import thonlivethondie.artconnect.entity.UserDesignStyleCategory;
 import thonlivethondie.artconnect.repository.UserDesignCategoryRepository;
 import thonlivethondie.artconnect.repository.UserDesignStyleCategoryRepository;
 import thonlivethondie.artconnect.repository.UserRepository;
+import thonlivethondie.artconnect.service.AwsS3Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MyPageService {
@@ -23,6 +29,7 @@ public class MyPageService {
     private final UserRepository userRepository;
     private final UserDesignCategoryRepository userDesignCategoryRepository;
     private final UserDesignStyleCategoryRepository userDesignStyleCategoryRepository;
+    private final AwsS3Service awsS3Service;
 
     @Transactional(readOnly = true)
     public Object getMyPageByUserType(Long userId) {
@@ -119,11 +126,38 @@ public class MyPageService {
 
     /**
      * 프로필 이미지 업데이트 (모든 사용자 타입 공통)
-     * TODO: 이미지 업로드 하는 코드 수정 필요
      */
     @Transactional
-    public void updateProfileImage(Long userId, String imageName, String imageUrl, Long imageSize, String imageType) {
+    public String updateProfileImage(Long userId, MultipartFile profileImage) {
         User user = findUserById(userId);
-        user.updateProfileImage(imageName, imageUrl, imageSize, imageType);
+
+        log.info("프로필 이미지 업로드 시작 - userId: {}", userId);
+
+        if (profileImage == null || profileImage.isEmpty()) {
+            log.warn("업로드할 프로필 이미지가 없습니다.");
+            throw new BadRequestException(ErrorCode.INVALID_IMAGE_FILE);
+        }
+
+        try {
+            String imageUrl = awsS3Service.uploadFile(profileImage);
+            log.info("S3 업로드 완료 - url: {}", imageUrl);
+
+            user.updateProfileImage(
+                    profileImage.getOriginalFilename(),
+                    imageUrl,
+                    profileImage.getSize(),
+                    profileImage.getContentType()
+            );
+
+            log.info("프로필 이미지 업데이트 완료 - userId: {}, 파일명: {}, URL: {}, 크기: {}, 타입: {}",
+                    userId, profileImage.getOriginalFilename(), imageUrl,
+                    profileImage.getSize(), profileImage.getContentType());
+
+            return imageUrl;
+
+        } catch (Exception e) {
+            log.error("프로필 이미지 업로드 실패", e);
+            throw new BadRequestException(ErrorCode.PROFILE_IMAGE_UPLOAD_FAILED);
+        }
     }
 }
