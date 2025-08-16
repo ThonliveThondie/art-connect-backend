@@ -7,8 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import thonlivethondie.artconnect.dto.BusinessOwnerMyPageUpdateRequest;
 import thonlivethondie.artconnect.dto.DesignerMyPageUpdateRequest;
+import thonlivethondie.artconnect.dto.ProfileImageResponseDto;
 import thonlivethondie.artconnect.service.MyPageService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 마이페이지 통합 컨트롤러
@@ -52,15 +54,31 @@ public class MyPageController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/profile-image")
-    public ResponseEntity<Void> updateProfileImage(
-            @AuthenticationPrincipal Long userId,
-            @RequestParam String imageName,
-            @RequestParam String imageUrl,
-            @RequestParam Long imageSize,
-            @RequestParam String imageType
+    /**
+     * 디자이너 프로필 이미지 업로드
+     */
+    @PostMapping("/designer/profile-image")
+    public ResponseEntity<ProfileImageResponseDto> uploadDesignerProfileImage(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("profileImage") MultipartFile profileImage
     ) {
-        myPageService.updateProfileImage(userId, imageName, imageUrl, imageSize, imageType);
-        return ResponseEntity.noContent().build();
+        Long userId = Long.parseLong(userDetails.getUsername());
+        String imageUrl = myPageService.updateProfileImage(userId, profileImage); // URL 반환
+        ProfileImageResponseDto dto = new ProfileImageResponseDto(imageUrl);
+        return ResponseEntity.ok(dto);
+    }
+
+    /**
+     * 소상공인 프로필 이미지 업로드
+     */
+    @PostMapping("/business-owner/profile-image")
+    public ResponseEntity<ProfileImageResponseDto> uploadBusinessOwnerProfileImage(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestPart("profileImage") MultipartFile profileImage
+    ) {
+        Long userId = Long.parseLong(userDetails.getUsername());
+        String imageUrl = myPageService.updateProfileImage(userId, profileImage); // URL 반환
+        ProfileImageResponseDto dto = new ProfileImageResponseDto(imageUrl);
+        return ResponseEntity.ok(dto);
     }
 }
