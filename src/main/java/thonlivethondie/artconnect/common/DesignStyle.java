@@ -4,12 +4,21 @@ import lombok.Getter;
 
 @Getter
 public enum DesignStyle {
-    MINIMAL("미니멀"),
-    MODERN("모던"),
-    CLASSIC("클래식"),
+    SIMPLE("심플한"),
+    WARM("따뜻한"),
+    FANCY("화려한"),
+    NEAT("산뜻한"),
+    TRANQUIL("차분한"),
     VINTAGE("빈티지"),
-    ILLUSTRATION("일러스트"),
-    TYPOGRAPHY("타이포그래피");
+    RETRO("레트로"),
+    CUTE("귀여운"),
+    LOVELY("러블리"),
+    REFRESHING("청량한"),
+    NATURAL("자연스러운"),
+    LUXURIOUS("고급스러운"),
+    MODERN("현대적인"),
+    CLASSIC("클래식한"),
+    EMOTIONAL("감성적인");
 
     private final String description;
 

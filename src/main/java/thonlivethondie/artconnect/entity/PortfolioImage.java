@@ -30,9 +30,6 @@ public class PortfolioImage extends BaseEntity {
     @Column(name = "image_size")
     private Long imageSize; // 파일 크기 (bytes)
 
-    @Column(name = "display_order", nullable = false)
-    private Integer displayOrder; // 이미지 표시 순서
-
     @Column(name = "is_thumbnail", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isThumbnail = false; // 썸네일 여부
 
@@ -41,13 +38,11 @@ public class PortfolioImage extends BaseEntity {
                           String imageUrl,
                           String imageName,
                           Long imageSize,
-                          Integer displayOrder,
                           Boolean isThumbnail) {
         this.portfolio = portfolio;
         this.imageUrl = imageUrl;
         this.imageName = imageName;
         this.imageSize = imageSize;
-        this.displayOrder = displayOrder;
         this.isThumbnail = isThumbnail != null ? isThumbnail : false;
     }
 }
