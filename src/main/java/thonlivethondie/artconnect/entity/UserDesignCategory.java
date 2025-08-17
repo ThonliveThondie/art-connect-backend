@@ -5,13 +5,14 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import thonlivethondie.artconnect.common.BaseTimeEntity;
 import thonlivethondie.artconnect.common.DesignCategory;
 
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "user_design_categories")
-public class UserDesignCategory {
+public class UserDesignCategory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
