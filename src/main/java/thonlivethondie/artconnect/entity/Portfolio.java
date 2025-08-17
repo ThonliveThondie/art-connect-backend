@@ -75,31 +75,14 @@ public class Portfolio extends BaseEntity {
 
         // 새 카테고리들 추가
         for (DesignCategory category : categories) {
-            this.addDesignCategory(category);
+            PortfolioDesignCategory portfolioDesignCategory =
+                    PortfolioDesignCategory.builder()
+                            .portfolio(this)
+                            .designCategory(category)
+                            .build();
+
+            this.designCategories.add(portfolioDesignCategory);
         }
-    }
-
-    // 디자인 카테고리 추가 메서드
-    public void addDesignCategory(DesignCategory category) {
-        if (this.designCategories.size() >= 3) {
-            throw new IllegalArgumentException("최대 3개의 디자인 카테고리만 선택할 수 있습니다.");
-        }
-
-        // 중복 체크
-        boolean exists = this.designCategories.stream()
-                .anyMatch(dc -> dc.getDesignCategory() == category);
-
-        if (exists) {
-            throw new IllegalArgumentException("이미 선택된 디자인 카테고리입니다.");
-        }
-
-        PortfolioDesignCategory portfolioDesignCategory =
-                PortfolioDesignCategory.builder()
-                        .portfolio(this)
-                        .designCategory(category)
-                        .build();
-
-        this.designCategories.add(portfolioDesignCategory);
     }
 
     // 디자인 카테고리 제거 메서드
@@ -112,5 +95,24 @@ public class Portfolio extends BaseEntity {
         return this.designCategories.stream()
                 .map(PortfolioDesignCategory::getDesignCategory)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 포트폴리오 정보 업데이트
+     */
+    public void updatePortfolioInfo(String title, String description) {
+        if (title != null && !title.trim().isEmpty()) {
+            this.title = title;
+        }
+        if (description != null) {
+            this.description = description;
+        }
+    }
+
+    /**
+     * 썸네일 URL 업데이트
+     */
+    public void updateThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
     }
 }

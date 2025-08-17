@@ -12,10 +12,6 @@ import thonlivethondie.artconnect.service.MyPageService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * 마이페이지 통합 컨트롤러
- * 사용자 타입(디자이너/소상공인)에 관계없이 동일한 엔드포인트 제공
- */
 @RestController
 @RequestMapping("/api/mypage")
 @RequiredArgsConstructor
