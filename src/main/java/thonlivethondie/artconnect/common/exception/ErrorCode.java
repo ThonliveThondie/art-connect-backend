@@ -39,6 +39,7 @@ public enum ErrorCode {
     INVALID_IMAGE_FILE(BAD_REQUEST,"I000", "유효하지 않은 이미지 파일입니다."),
     PROFILE_IMAGE_UPLOAD_FAILED(BAD_REQUEST, "I002", "이미지 업로드에 실패했습니다.");
 
+
     private HttpStatus status;
     private final String code;
     private final String message;
