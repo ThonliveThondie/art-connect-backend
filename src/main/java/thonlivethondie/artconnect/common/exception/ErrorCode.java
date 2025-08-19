@@ -25,6 +25,13 @@ public enum ErrorCode {
     // 작업의뢰서 관련 에러
     WORK_REQUEST_NOT_FOUND(BAD_REQUEST, "W001", "작업의뢰서를 찾을 수 없습니다."),
     WORK_REQUEST_ACCESS_DENIED(BAD_REQUEST, "W002", "작업의뢰서에 접근할 권한이 없습니다."),
+    INVALID_WORK_REQUEST_STATUS(BAD_REQUEST, "W003", "작업의뢰서 상태가 올바르지 않습니다."),
+    UNAUTHORIZED_ACCESS(BAD_REQUEST, "W004", "접근 권한이 없습니다."),
+    
+    // 시안 제출 관련 에러
+    WORK_SUBMISSION_NOT_FOUND(BAD_REQUEST, "WS001", "시안을 찾을 수 없습니다."),
+    IMAGE_REQUIRED(BAD_REQUEST, "WS002", "이미지는 필수입니다."),
+    
     IMAGE_UPLOAD_FAILED(BAD_REQUEST, "I001", "이미지 업로드에 실패했습니다."),
 
     // 포트폴리오 에러

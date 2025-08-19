@@ -121,7 +121,7 @@ public class WorkRequest extends BaseEntity {
         this.goal = goal;
         this.additionalDescription = additionalDescription;
         this.additionalRequirement = additionalRequirement;
-        this.status = status != null ? status : WorkRequestStatus.PENDING;
+        this.status = status != null ? status : WorkRequestStatus.PROPOSAL;
     }
 
     /**
@@ -175,5 +175,18 @@ public class WorkRequest extends BaseEntity {
         return this.designCategories.stream()
                 .map(WorkRequestDesignCategory::getDesignCategory)
                 .collect(Collectors.toList());
+    }
+
+    // 상태 변경 메서드
+    public void updateStatus(WorkRequestStatus status) {
+        this.status = status;
+    }
+
+    // 제안 수락 메서드 (PROPOSAL -> PENDING)
+    public void acceptProposal() {
+        if (this.status != WorkRequestStatus.PROPOSAL) {
+            throw new IllegalStateException("제안 상태가 아닌 작업의뢰서는 수락할 수 없습니다.");
+        }
+        this.status = WorkRequestStatus.PENDING;
     }
 }
