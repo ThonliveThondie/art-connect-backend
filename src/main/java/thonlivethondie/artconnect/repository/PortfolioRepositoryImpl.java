@@ -9,6 +9,7 @@ import thonlivethondie.artconnect.entity.QPortfolio;
 import thonlivethondie.artconnect.entity.QPortfolioDesignCategory;
 import thonlivethondie.artconnect.entity.QUser;
 import thonlivethondie.artconnect.entity.QUserDesignCategory;
+import thonlivethondie.artconnect.entity.QUserDesignStyleCategory;
 import thonlivethondie.artconnect.entity.User;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
      * <p>
      * 검색 대상 필드:
      * - Portfolio: title, description, designCategories (포트폴리오가 있는 경우)
-     * - User: speciality (전문분야 카테고리, 모든 디자이너)
+     * - User: speciality (전문분야 카테고리), designStyleCategories (디자인 스타일 카테고리)
      *
      * @param keywords 검색할 키워드 목록
      * @return 키워드와 매칭되는 디자이너 목록 (중복 제거, 최대 50개)
@@ -35,14 +36,15 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
         QPortfolioDesignCategory portfolioDesignCategory = QPortfolioDesignCategory.portfolioDesignCategory;
         QUser user = QUser.user;
         QUserDesignCategory userDesignCategory = QUserDesignCategory.userDesignCategory;
+        QUserDesignStyleCategory userDesignStyleCategory = QUserDesignStyleCategory.userDesignStyleCategory;
 
         // 키워드가 null이거나 비어있는 경우 빈 리스트 반환
         if (keywords == null || keywords.isEmpty()) {
             return List.of();
         }
 
-        // User의 전문분야 검색 조건
-        BooleanBuilder specialtyBuilder = new BooleanBuilder();
+        // User의 전문분야 및 디자인 스타일 검색 조건
+        BooleanBuilder userCategoryBuilder = new BooleanBuilder();
 
         // Portfolio 검색 조건 (포트폴리오가 있는 디자이너 대상)
         BooleanBuilder portfolioBuilder = new BooleanBuilder();
@@ -53,7 +55,10 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
                 String trimmedKeyword = keyword.trim().toLowerCase();
 
                 // User 전문분야 검색 (UserDesignCategory 통해 검색)
-                specialtyBuilder.or(userDesignCategory.designCategory.stringValue().lower().contains(trimmedKeyword));
+                userCategoryBuilder.or(userDesignCategory.designCategory.stringValue().lower().contains(trimmedKeyword));
+                
+                // User 디자인 스타일 검색 (UserDesignStyleCategory 통해 검색)
+                userCategoryBuilder.or(userDesignStyleCategory.designStyle.stringValue().lower().contains(trimmedKeyword));
 
                 // Portfolio 검색 조건
                 BooleanBuilder portfolioKeywordBuilder = new BooleanBuilder();
@@ -66,23 +71,24 @@ public class PortfolioRepositoryImpl implements PortfolioRepositoryCustom {
         }
 
         // 조건이 없는 경우 빈 리스트 반환
-        if (!specialtyBuilder.hasValue() && !portfolioBuilder.hasValue()) {
+        if (!userCategoryBuilder.hasValue() && !portfolioBuilder.hasValue()) {
             return List.of();
         }
 
         // User 테이블을 기준으로 검색 (디자이너만)
-        // 전문분야로 먼저 검색하고, 포트폴리오 조건은 LEFT JOIN으로 추가
+        // 전문분야 및 디자인 스타일로 먼저 검색하고, 포트폴리오 조건은 LEFT JOIN으로 추가
         BooleanBuilder finalCondition = new BooleanBuilder();
         finalCondition.and(user.userType.eq(UserType.DESIGNER));
 
-        if (specialtyBuilder.hasValue()) {
-            finalCondition.and(specialtyBuilder);
+        if (userCategoryBuilder.hasValue()) {
+            finalCondition.and(userCategoryBuilder);
         }
 
         return queryFactory
                 .select(user)
                 .from(user)
                 .leftJoin(user.speciality, userDesignCategory)
+                .leftJoin(user.designStyleCategories, userDesignStyleCategory)
                 .leftJoin(user.portfolios, portfolio)
                 .leftJoin(portfolio.designCategories, portfolioDesignCategory)
                 .where(finalCondition.or(

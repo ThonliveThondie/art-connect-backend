@@ -3,8 +3,14 @@ package thonlivethondie.artconnect.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import thonlivethondie.artconnect.common.DesignCategory;
+import thonlivethondie.artconnect.common.DesignStyle;
 import thonlivethondie.artconnect.dto.AiProposalDto;
+import thonlivethondie.artconnect.dto.PortfolioImageSimpleDto;
 import thonlivethondie.artconnect.dto.RecommendedDesignerDto;
+import thonlivethondie.artconnect.entity.Portfolio;
+import thonlivethondie.artconnect.entity.PortfolioImage;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.repository.PortfolioRepository;
 
@@ -26,6 +32,7 @@ public class DesignerMatchingService {
      * @param proposal AI가 생성한 디자인 제안
      * @return 추천된 디자이너 목록
      */
+    @Transactional(readOnly = true)
     public List<RecommendedDesignerDto> findMatchingDesigners(AiProposalDto proposal) {
         log.info("디자이너 매칭 시작 - proposal: {}", proposal);
 
@@ -33,15 +40,79 @@ public class DesignerMatchingService {
         List<String> keywords = extractKeywords(proposal);
         log.info("추출된 키워드: {}", keywords);
 
-        // 2. 키워드를 사용하여 디자이너 검색
-        List<User> matchingDesigners = portfolioRepository.findDesignersByKeywords(keywords);
+        // 2. 한국어 키워드를 영어 키워드로 변환 (매핑)
+        List<String> mappedKeywords = mapKoreanToEnglishKeywords(keywords);
+        log.info("매핑된 키워드: {}", mappedKeywords);
+
+        // 3. 원본 키워드와 매핑된 키워드를 합쳐서 검색
+        List<String> allKeywords = Stream.concat(keywords.stream(), mappedKeywords.stream())
+                .distinct()
+                .collect(Collectors.toList());
+        log.info("최종 검색 키워드: {}", allKeywords);
+
+        // 4. 키워드를 사용하여 디자이너 검색
+        List<User> matchingDesigners = portfolioRepository.findDesignersByKeywords(allKeywords);
         log.info("매칭된 디자이너 수: {}", matchingDesigners.size());
 
-        // 3. User 엔티티를 RecommendedDesignerDto로 변환
+        // 5. User 엔티티를 RecommendedDesignerDto로 변환
         List<RecommendedDesignerDto> recommendedDesigners = convertToRecommendedDesignerDto(matchingDesigners);
 
         log.info("디자이너 매칭 완료 - 추천된 디자이너 수: {}", recommendedDesigners.size());
         return recommendedDesigners;
+    }
+
+    /**
+     * 한국어 키워드를 영어 키워드로 매핑합니다.
+     * DesignStyle과 DesignCategory enum의 description을 name으로 변환합니다.
+     *
+     * @param keywords 원본 키워드 목록
+     * @return 매핑된 영어 키워드 목록
+     */
+    private List<String> mapKoreanToEnglishKeywords(List<String> keywords) {
+        if (keywords == null || keywords.isEmpty()) {
+            return List.of();
+        }
+
+        return keywords.stream()
+                .flatMap(keyword -> {
+                    String trimmedKeyword = keyword.trim();
+                    return Stream.of(
+                            mapDesignStyleKeyword(trimmedKeyword),
+                            mapDesignCategoryKeyword(trimmedKeyword)
+                    ).filter(mapped -> !mapped.isEmpty());
+                })
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 한국어 키워드를 DesignStyle enum name으로 매핑합니다.
+     *
+     * @param keyword 한국어 키워드
+     * @return 매핑된 영어 키워드 (소문자)
+     */
+    private String mapDesignStyleKeyword(String keyword) {
+        for (DesignStyle style : DesignStyle.values()) {
+            if (style.getDescription().contains(keyword) || keyword.contains(style.getDescription())) {
+                return style.name().toLowerCase();
+            }
+        }
+        return "";
+    }
+
+    /**
+     * 한국어 키워드를 DesignCategory enum name으로 매핑합니다.
+     *
+     * @param keyword 한국어 키워드
+     * @return 매핑된 영어 키워드 (소문자)
+     */
+    private String mapDesignCategoryKeyword(String keyword) {
+        for (DesignCategory category : DesignCategory.values()) {
+            if (category.getDescription().contains(keyword) || keyword.contains(category.getDescription())) {
+                return category.name().toLowerCase();
+            }
+        }
+        return "";
     }
 
     /**
@@ -146,19 +217,89 @@ public class DesignerMatchingService {
         RecommendedDesignerDto dto = new RecommendedDesignerDto();
         dto.setUserId(user.getId());
         dto.setNickname(user.getNickname());
+        
         // 전문분야 목록을 문자열로 변환
         String specialtiesStr = user.getSelectedSpecialities().stream()
                 .map(category -> category.getDescription())
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("");
         dto.setSpecialty(specialtiesStr);
+        
+        // 프로필 이미지 URL 설정
         dto.setProfileImageUrl(user.getImageUrl());
+        
+        // 포트폴리오 이미지 최대 2개 가져오기
+        List<PortfolioImageSimpleDto> portfolioImages = getPortfolioImages(user.getId());
+        dto.setPortfolioImageUrl(portfolioImages);
 
-        // 경력과 평점은 현재 User 엔티티에 없으므로 기본값 설정
-        // 추후 Portfolio나 다른 엔티티에서 계산하여 설정할 수 있음
-        dto.setExperience(null);
-        dto.setRating(null);
+        return dto;
+    }
 
+    /**
+     * 디자이너의 포트폴리오 이미지를 최대 2개까지 가져옵니다.
+     * 썸네일 이미지를 우선적으로 선택하고, 없으면 일반 이미지를 선택합니다.
+     *
+     * @param userId 디자이너의 사용자 ID
+     * @return 포트폴리오 이미지 DTO 목록 (최대 2개)
+     */
+    private List<PortfolioImageSimpleDto> getPortfolioImages(Long userId) {
+        try {
+            // 해당 디자이너의 포트폴리오 목록 조회
+            List<Portfolio> portfolios = portfolioRepository.findByDesignerId(userId);
+            
+            if (portfolios.isEmpty()) {
+                return List.of();
+            }
+
+            // 모든 포트폴리오에서 이미지 수집
+            List<PortfolioImage> allImages = portfolios.stream()
+                    .flatMap(portfolio -> portfolio.getPortfolioImages().stream())
+                    .collect(Collectors.toList());
+
+            if (allImages.isEmpty()) {
+                return List.of();
+            }
+
+            // 썸네일 이미지 우선 선택
+            List<PortfolioImage> thumbnailImages = allImages.stream()
+                    .filter(image -> Boolean.TRUE.equals(image.getIsThumbnail()))
+                    .limit(2)
+                    .collect(Collectors.toList());
+
+            // 썸네일이 2개 미만이면 일반 이미지로 보충
+            if (thumbnailImages.size() < 2) {
+                List<PortfolioImage> nonThumbnailImages = allImages.stream()
+                        .filter(image -> !Boolean.TRUE.equals(image.getIsThumbnail()))
+                        .limit(2 - thumbnailImages.size())
+                        .collect(Collectors.toList());
+                
+                thumbnailImages.addAll(nonThumbnailImages);
+            }
+
+            // PortfolioImage 엔티티를 PortfolioImageSimpleDto로 변환
+            return thumbnailImages.stream()
+                    .map(this::convertToPortfolioImageSimpleDto)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.warn("포트폴리오 이미지 조회 중 오류 발생 (userId: {}): {}", userId, e.getMessage());
+            return List.of();
+        }
+    }
+
+    /**
+     * PortfolioImage 엔티티를 PortfolioImageSimpleDto로 변환합니다.
+     * 순환 참조를 방지하기 위해 필요한 정보만 추출합니다.
+     *
+     * @param portfolioImage 변환할 PortfolioImage 엔티티
+     * @return 변환된 PortfolioImageSimpleDto
+     */
+    private PortfolioImageSimpleDto convertToPortfolioImageSimpleDto(PortfolioImage portfolioImage) {
+        PortfolioImageSimpleDto dto = new PortfolioImageSimpleDto();
+        dto.setId(portfolioImage.getId());
+        dto.setImageUrl(portfolioImage.getImageUrl());
+        dto.setImageName(portfolioImage.getImageName());
+        dto.setIsThumbnail(portfolioImage.getIsThumbnail());
+        
         return dto;
     }
 }

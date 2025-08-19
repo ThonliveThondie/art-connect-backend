@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 /**
  * AI가 추천하는 디자이너 정보를 위한 DTO 클래스
@@ -21,9 +22,9 @@ public class RecommendedDesignerDto {
 
     private String specialty;
 
-    private Integer experience;
-
-    // rating과 profileImageUrl은 아직 미지수
-    private Double rating;
+    // User 엔티티의 imageUrl 가져오기
     private String profileImageUrl;
+
+    // PortfolioImage 엔티티의 imageUrl 2장 가져오기
+    private List<PortfolioImageSimpleDto> portfolioImageUrl;
 }

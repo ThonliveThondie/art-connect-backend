@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import thonlivethondie.artconnect.common.*;
 
 import java.util.ArrayList;
@@ -43,10 +44,12 @@ public class User extends BaseEntity {
 
     // 전문분야 카테고리들 (최대 3개)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<UserDesignCategory> speciality = new ArrayList<>();
 
     // 디자인 스타일 카테고리들 (최대 3개)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @BatchSize(size = 10)
     private List<UserDesignStyleCategory> designStyleCategories = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)

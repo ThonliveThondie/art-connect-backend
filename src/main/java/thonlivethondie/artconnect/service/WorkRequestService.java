@@ -11,6 +11,7 @@ import thonlivethondie.artconnect.common.exception.BadRequestException;
 import thonlivethondie.artconnect.common.exception.ErrorCode;
 import thonlivethondie.artconnect.dto.WorkRequestCreateRequestDto;
 import thonlivethondie.artconnect.dto.WorkRequestResponseDto;
+import thonlivethondie.artconnect.dto.WorkRequestSimpleDto;
 import thonlivethondie.artconnect.entity.Store;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.entity.WorkRequest;
@@ -200,5 +201,44 @@ public class WorkRequestService {
         return workRequests.stream()
                 .map(WorkRequestResponseDto::from)
                 .toList();
+    }
+
+    /**
+     * 디자이너가 받은 의뢰서 간소화된 목록 조회
+     * 목록 조회 시 필요한 핵심 정보만 반환 (프로젝트 제목, 매장명, 예산)
+     */
+    public List<WorkRequestSimpleDto> getSimpleWorkRequestsForDesigner(Long designerId) {
+        User designer = validateDesigner(designerId);
+
+        List<WorkRequest> workRequests = workRequestRepository.findByDesignerOrderByCreateDateDesc(designer);
+
+        return workRequests.stream()
+                .map(WorkRequestSimpleDto::from)
+                .toList();
+    }
+
+    /**
+     * 디자이너가 작업의뢰서 거절 (삭제)
+     * 디자이너만 자신이 받은 의뢰서를 삭제할 수 있음
+     */
+    @Transactional
+    public void deleteWorkRequestByDesigner(Long workRequestId, Long designerId) {
+        // 1. 디자이너 유효성 검증
+        User designer = validateDesigner(designerId);
+
+        // 2. 작업의뢰서 존재 여부 확인
+        WorkRequest workRequest = workRequestRepository.findById(workRequestId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.WORK_REQUEST_NOT_FOUND));
+
+        // 3. 디자이너 권한 검증 (자신이 받은 의뢰서인지 확인)
+        if (!workRequest.getDesigner().getId().equals(designerId)) {
+            throw new BadRequestException(ErrorCode.WORK_REQUEST_ACCESS_DENIED);
+        }
+
+        // 4. 의뢰서 삭제 (연관된 이미지와 카테고리도 cascade로 함께 삭제됨)
+        workRequestRepository.delete(workRequest);
+
+        log.info("작업의뢰서가 삭제되었습니다. ID: {}, 디자이너: {}, 프로젝트: {}",
+                workRequestId, designer.getNickname(), workRequest.getProjectTitle());
     }
 }
