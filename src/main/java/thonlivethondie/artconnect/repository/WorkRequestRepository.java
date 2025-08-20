@@ -24,4 +24,7 @@ public interface WorkRequestRepository extends JpaRepository<WorkRequest, Long> 
 
     // 소상공인의 특정 상태 프로젝트 조회
     List<WorkRequest> findByBusinessOwnerAndStatusOrderByCreateDateDesc(User businessOwner, WorkRequestStatus status);
+    
+    // 소상공인의 특정 상태들에 해당하는 의뢰서 조회 (수락한 프로젝트들)
+    List<WorkRequest> findByBusinessOwnerAndStatusInOrderByCreateDateDesc(User businessOwner, List<WorkRequestStatus> statuses);
 }

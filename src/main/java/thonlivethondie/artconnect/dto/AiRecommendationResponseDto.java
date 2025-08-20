@@ -20,4 +20,14 @@ public class AiRecommendationResponseDto {
     private AiProposalDto proposal;
 
     private List<RecommendedDesignerDto> recommendedDesigners;
+
+    /**
+     * 세션 ID (새로고침 기능을 위해 필요)
+     */
+    private String sessionId;
+
+    public AiRecommendationResponseDto(AiProposalDto proposal, List<RecommendedDesignerDto> recommendedDesigners) {
+        this.proposal = proposal;
+        this.recommendedDesigners = recommendedDesigners;
+    }
 }

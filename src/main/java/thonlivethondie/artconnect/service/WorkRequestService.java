@@ -14,6 +14,8 @@ import thonlivethondie.artconnect.dto.WorkRequestResponseDto;
 import thonlivethondie.artconnect.dto.WorkRequestSimpleDto;
 import thonlivethondie.artconnect.dto.AcceptedProjectSimpleDto;
 import thonlivethondie.artconnect.dto.ProjectSimpleDetailDto;
+import thonlivethondie.artconnect.dto.CompletedProjectForBusinessOwnerDto;
+import thonlivethondie.artconnect.dto.CompletedProjectForDesignerDto;
 import thonlivethondie.artconnect.entity.Store;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.entity.WorkRequest;
@@ -277,11 +279,11 @@ public class WorkRequestService {
     public List<WorkRequestResponseDto> getAcceptedProjectsForDesigner(Long designerId) {
         User designer = validateDesigner(designerId);
 
-        // PENDING, FEEDBACK_WAITING, ACCEPTED, COMPLETED 상태의 프로젝트들 조회
+        // PENDING, FEEDBACK_WAITING, ACCEPTED 상태의 프로젝트들 조회
         List<WorkRequest> acceptedProjects = workRequestRepository.findByDesignerAndStatusInOrderByCreateDateDesc(
                 designer,
                 List.of(WorkRequestStatus.PENDING, WorkRequestStatus.FEEDBACK_WAITING,
-                        WorkRequestStatus.ACCEPTED, WorkRequestStatus.COMPLETED)
+                        WorkRequestStatus.ACCEPTED)
         );
 
         return acceptedProjects.stream()
@@ -295,11 +297,47 @@ public class WorkRequestService {
     public List<AcceptedProjectSimpleDto> getAcceptedProjectsSimpleForDesigner(Long designerId) {
         User designer = validateDesigner(designerId);
 
-        // PENDING, FEEDBACK_WAITING, ACCEPTED, COMPLETED 상태의 프로젝트들 조회
+        // PENDING, FEEDBACK_WAITING, ACCEPTED 상태의 프로젝트들 조회
         List<WorkRequest> acceptedProjects = workRequestRepository.findByDesignerAndStatusInOrderByCreateDateDesc(
                 designer,
                 List.of(WorkRequestStatus.PENDING, WorkRequestStatus.FEEDBACK_WAITING,
-                        WorkRequestStatus.ACCEPTED, WorkRequestStatus.COMPLETED)
+                        WorkRequestStatus.ACCEPTED)
+        );
+
+        return acceptedProjects.stream()
+                .map(AcceptedProjectSimpleDto::from)
+                .toList();
+    }
+
+    /**
+     * 소상공인이 의뢰한 프로젝트 중 디자이너가 수락한 프로젝트 목록 조회 (PENDING 상태 이상의 프로젝트들)
+     */
+    public List<WorkRequestResponseDto> getAcceptedProjectsForBusinessOwner(Long businessOwnerId) {
+        User businessOwner = validateBusinessOwner(businessOwnerId);
+
+        // PENDING, FEEDBACK_WAITING, ACCEPTED 상태의 프로젝트들 조회
+        List<WorkRequest> acceptedProjects = workRequestRepository.findByBusinessOwnerAndStatusInOrderByCreateDateDesc(
+                businessOwner,
+                List.of(WorkRequestStatus.PENDING, WorkRequestStatus.FEEDBACK_WAITING,
+                        WorkRequestStatus.ACCEPTED)
+        );
+
+        return acceptedProjects.stream()
+                .map(WorkRequestResponseDto::from)
+                .toList();
+    }
+
+    /**
+     * 소상공인이 의뢰한 프로젝트 중 디자이너가 수락한 프로젝트 간소화된 목록 조회
+     */
+    public List<AcceptedProjectSimpleDto> getAcceptedProjectsSimpleForBusinessOwner(Long businessOwnerId) {
+        User businessOwner = validateBusinessOwner(businessOwnerId);
+
+        // PENDING, FEEDBACK_WAITING, ACCEPTED 상태의 프로젝트들 조회
+        List<WorkRequest> acceptedProjects = workRequestRepository.findByBusinessOwnerAndStatusInOrderByCreateDateDesc(
+                businessOwner,
+                List.of(WorkRequestStatus.PENDING, WorkRequestStatus.FEEDBACK_WAITING,
+                        WorkRequestStatus.ACCEPTED)
         );
 
         return acceptedProjects.stream()
@@ -359,7 +397,7 @@ public class WorkRequestService {
     /**
      * 소상공인의 완료된 프로젝트 목록 조회 (COMPLETED 상태)
      */
-    public List<WorkRequestResponseDto> getCompletedProjectsForBusinessOwner(Long businessOwnerId) {
+    public List<CompletedProjectForBusinessOwnerDto> getCompletedProjectsForBusinessOwner(Long businessOwnerId) {
         User businessOwner = validateBusinessOwner(businessOwnerId);
 
         // COMPLETED 상태의 프로젝트들 조회
@@ -368,14 +406,14 @@ public class WorkRequestService {
         );
 
         return completedProjects.stream()
-                .map(WorkRequestResponseDto::from)
+                .map(CompletedProjectForBusinessOwnerDto::from)
                 .toList();
     }
 
     /**
      * 디자이너의 완료된 프로젝트 목록 조회 (COMPLETED 상태)
      */
-    public List<WorkRequestResponseDto> getCompletedProjectsForDesigner(Long designerId) {
+    public List<CompletedProjectForDesignerDto> getCompletedProjectsForDesigner(Long designerId) {
         User designer = validateDesigner(designerId);
 
         // COMPLETED 상태의 프로젝트들 조회
@@ -384,7 +422,7 @@ public class WorkRequestService {
         );
 
         return completedProjects.stream()
-                .map(WorkRequestResponseDto::from)
+                .map(CompletedProjectForDesignerDto::from)
                 .toList();
     }
 }

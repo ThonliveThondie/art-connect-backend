@@ -14,6 +14,8 @@ import thonlivethondie.artconnect.dto.WorkRequestResponseDto;
 import thonlivethondie.artconnect.dto.WorkRequestSimpleDto;
 import thonlivethondie.artconnect.dto.AcceptedProjectSimpleDto;
 import thonlivethondie.artconnect.dto.ProjectSimpleDetailDto;
+import thonlivethondie.artconnect.dto.CompletedProjectForBusinessOwnerDto;
+import thonlivethondie.artconnect.dto.CompletedProjectForDesignerDto;
 import thonlivethondie.artconnect.service.WorkRequestService;
 
 import java.util.List;
@@ -170,6 +172,36 @@ public class WorkRequestController {
     }
 
     /**
+     * 소상공인이 의뢰한 프로젝트 중 디자이너가 수락한 프로젝트 목록 조회
+     */
+    @GetMapping("/business-owner/accepted")
+    public ResponseEntity<List<WorkRequestResponseDto>> getAcceptedProjectsForBusinessOwner(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // UserDetails에서 userId 추출
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+        List<WorkRequestResponseDto> acceptedProjects = workRequestService.getAcceptedProjectsForBusinessOwner(userId);
+
+        return ResponseEntity.ok(acceptedProjects);
+    }
+
+    /**
+     * 소상공인이 의뢰한 프로젝트 중 디자이너가 수락한 프로젝트 간소화된 목록 조회
+     */
+    @GetMapping("/business-owner/accepted/simple")
+    public ResponseEntity<List<AcceptedProjectSimpleDto>> getAcceptedProjectsSimpleForBusinessOwner(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        // UserDetails에서 userId 추출
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+        List<AcceptedProjectSimpleDto> acceptedProjects = workRequestService.getAcceptedProjectsSimpleForBusinessOwner(userId);
+
+        return ResponseEntity.ok(acceptedProjects);
+    }
+
+    /**
      * 프로젝트 간소화된 상세 정보 조회
      * 클릭한 프로젝트의 기본 정보만 반환 (storeName, designerName, endDate)
      */
@@ -210,7 +242,7 @@ public class WorkRequestController {
      * COMPLETED 상태인 프로젝트만 반환
      */
     @GetMapping("/business-owner/completed")
-    public ResponseEntity<List<WorkRequestResponseDto>> getCompletedProjectsForBusinessOwner(
+    public ResponseEntity<List<CompletedProjectForBusinessOwnerDto>> getCompletedProjectsForBusinessOwner(
             @AuthenticationPrincipal UserDetails userDetails) {
 
         // UserDetails에서 userId 추출
@@ -218,7 +250,7 @@ public class WorkRequestController {
 
         log.info("완료된 프로젝트 목록 조회 요청 - businessOwnerId: {}", userId);
 
-        List<WorkRequestResponseDto> completedProjects = workRequestService.getCompletedProjectsForBusinessOwner(userId);
+        List<CompletedProjectForBusinessOwnerDto> completedProjects = workRequestService.getCompletedProjectsForBusinessOwner(userId);
 
         return ResponseEntity.ok(completedProjects);
     }
@@ -228,7 +260,7 @@ public class WorkRequestController {
      * COMPLETED 상태인 프로젝트만 반환
      */
     @GetMapping("/designer/completed")
-    public ResponseEntity<List<WorkRequestResponseDto>> getCompletedProjectsForDesigner(
+    public ResponseEntity<List<CompletedProjectForDesignerDto>> getCompletedProjectsForDesigner(
             @AuthenticationPrincipal UserDetails userDetails) {
 
         // UserDetails에서 userId 추출
@@ -236,7 +268,7 @@ public class WorkRequestController {
 
         log.info("디자이너 완료된 프로젝트 목록 조회 요청 - designerId: {}", userId);
 
-        List<WorkRequestResponseDto> completedProjects = workRequestService.getCompletedProjectsForDesigner(userId);
+        List<CompletedProjectForDesignerDto> completedProjects = workRequestService.getCompletedProjectsForDesigner(userId);
 
         return ResponseEntity.ok(completedProjects);
     }

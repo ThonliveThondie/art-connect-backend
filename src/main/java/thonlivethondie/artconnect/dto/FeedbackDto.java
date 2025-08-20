@@ -10,6 +10,7 @@ public record FeedbackDto(
     String content,
     String authorName,
     String authorType, // "BUSINESS_OWNER" 또는 "DESIGNER"
+    String imageUrl,   // 작성자 프로필 이미지 URL
     LocalDateTime createdAt
 ) {
 }

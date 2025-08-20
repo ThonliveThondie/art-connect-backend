@@ -239,6 +239,7 @@ public class WorkSubmissionService {
                         feedback.getContent(),
                         feedback.getAuthor().getNickname(),
                         feedback.getAuthor().getUserType().name(),
+                        feedback.getAuthor().getImageUrl(),
                         feedback.getCreateDate()
                 ))
                 .collect(Collectors.toList());
@@ -294,6 +295,7 @@ public class WorkSubmissionService {
                         feedback.getContent(),
                         feedback.getAuthor().getNickname(),
                         feedback.getAuthor().getUserType().name(),
+                        feedback.getAuthor().getImageUrl(),
                         feedback.getCreateDate()
                 ))
                 .collect(Collectors.toList());
