@@ -40,3 +40,4 @@ out/
 .qodo
 /src/main/resources/security/
 .env
+/src/main/generated

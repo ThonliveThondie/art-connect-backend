@@ -73,6 +73,24 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-anthropic-spring-boot-starter'
 }
 
+// QueryDSL Q클래스 생성 경로 설정
+def querydslDir = "src/main/generated"
+
+// QueryDSL Q클래스 생성
+sourceSets {
+    main.java.srcDirs += [querydslDir]
+}
+
+// 컴파일 시 Q클래스 생성
+compileJava {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslDir))
+}
+
+// clean 시 생성된 Q클래스 삭제
+clean {
+    delete file(querydslDir)
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }

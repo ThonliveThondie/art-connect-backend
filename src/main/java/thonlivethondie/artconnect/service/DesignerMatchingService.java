@@ -6,16 +6,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import thonlivethondie.artconnect.common.DesignCategory;
 import thonlivethondie.artconnect.common.DesignStyle;
-import thonlivethondie.artconnect.dto.AiProposalDto;
-import thonlivethondie.artconnect.dto.PortfolioImageSimpleDto;
-import thonlivethondie.artconnect.dto.RecommendedDesignerDto;
+import thonlivethondie.artconnect.dto.*;
 import thonlivethondie.artconnect.entity.Portfolio;
+import thonlivethondie.artconnect.entity.PortfolioDesignCategory;
 import thonlivethondie.artconnect.entity.PortfolioImage;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.repository.PortfolioRepository;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,6 +57,48 @@ public class DesignerMatchingService {
 
         log.info("디자이너 매칭 완료 - 추천된 디자이너 수: {}", recommendedDesigners.size());
         return recommendedDesigners;
+    }
+
+    /**
+     * AI의 제안을 기반으로 점수가 매겨진 디자이너 목록을 반환합니다.
+     * 키워드 매칭 점수에 따라 정렬되며, 최대 10명까지 반환합니다.
+     *
+     * @param proposal AI가 생성한 디자인 제안
+     * @return 점수순으로 정렬된 디자이너 목록 (최대 10명)
+     */
+    @Transactional(readOnly = true)
+    public List<ScoredDesignerDto> findScoredMatchingDesigners(AiProposalDto proposal) {
+        log.info("점수 기반 디자이너 매칭 시작 - proposal: {}", proposal);
+
+        // 1. AI 제안에서 키워드 추출
+        List<String> keywords = extractKeywords(proposal);
+        log.info("추출된 키워드: {}", keywords);
+
+        // 2. 한국어 키워드를 영어 키워드로 변환 (매핑)
+        List<String> mappedKeywords = mapKoreanToEnglishKeywords(keywords);
+        log.info("매핑된 키워드: {}", mappedKeywords);
+
+        // 3. 원본 키워드와 매핑된 키워드를 합쳐서 검색
+        List<String> allKeywords = Stream.concat(keywords.stream(), mappedKeywords.stream())
+                .distinct()
+                .collect(Collectors.toList());
+        log.info("최종 검색 키워드: {}", allKeywords);
+
+        // 4. 키워드를 사용하여 디자이너 검색
+        List<User> matchingDesigners = portfolioRepository.findDesignersByKeywords(allKeywords);
+        log.info("매칭된 디자이너 수: {}", matchingDesigners.size());
+
+        // 5. 각 디자이너에 대해 키워드 매칭 점수 계산
+        List<ScoredDesignerDto> scoredDesigners = calculateMatchingScores(matchingDesigners, allKeywords);
+
+        // 6. 점수순으로 정렬하고 상위 10명만 선택
+        List<ScoredDesignerDto> topDesigners = scoredDesigners.stream()
+                .sorted((a, b) -> Integer.compare(b.getMatchingScore(), a.getMatchingScore()))
+                .limit(10)
+                .collect(Collectors.toList());
+
+        log.info("점수 기반 디자이너 매칭 완료 - 상위 디자이너 수: {}", topDesigners.size());
+        return topDesigners;
     }
 
     /**
@@ -301,5 +341,101 @@ public class DesignerMatchingService {
         dto.setIsThumbnail(portfolioImage.getIsThumbnail());
         
         return dto;
+    }
+
+    /**
+     * 디자이너 목록에 대해 키워드 매칭 점수를 계산합니다.
+     *
+     * @param designers 점수를 계산할 디자이너 목록
+     * @param keywords 매칭에 사용할 키워드 목록
+     * @return 점수가 계산된 디자이너 목록
+     */
+    private List<ScoredDesignerDto> calculateMatchingScores(List<User> designers, List<String> keywords) {
+        return designers.stream()
+                .map(designer -> calculateDesignerScore(designer, keywords))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 개별 디자이너에 대해 키워드 매칭 점수를 계산합니다.
+     *
+     * @param designer 점수를 계산할 디자이너
+     * @param keywords 매칭에 사용할 키워드 목록
+     * @return 점수가 계산된 디자이너 DTO
+     */
+    private ScoredDesignerDto calculateDesignerScore(User designer, List<String> keywords) {
+        int totalScore = 0;
+        List<String> matchedKeywords = new ArrayList<>();
+
+        for (String keyword : keywords) {
+            String lowerKeyword = keyword.toLowerCase();
+            int keywordScore = 0;
+
+            // 1. 전문분야 매칭 (가중치: 2)
+            if (designer.getSelectedSpecialities() != null) {
+                for (DesignCategory category : designer.getSelectedSpecialities()) {
+                    if (category.name().toLowerCase().contains(lowerKeyword) || 
+                        category.getDescription().toLowerCase().contains(lowerKeyword)) {
+                        keywordScore += 2;
+                        break;
+                    }
+                }
+            }
+
+            // 2. 디자인 스타일 매칭 (가중치: 3)
+            if (designer.getSelectedDesignStyles() != null) {
+                for (DesignStyle style : designer.getSelectedDesignStyles()) {
+                    if (style.name().toLowerCase().contains(lowerKeyword) || 
+                        style.getDescription().toLowerCase().contains(lowerKeyword)) {
+                        keywordScore += 3;
+                        break;
+                    }
+                }
+            }
+
+            // 3. 포트폴리오 매칭 (가중치: 1)
+            if (designer.getPortfolios() != null) {
+                for (Portfolio portfolio : designer.getPortfolios()) {
+                    boolean portfolioMatched = false;
+
+                    // 포트폴리오 제목 매칭
+                    if (portfolio.getTitle() != null && 
+                        portfolio.getTitle().toLowerCase().contains(lowerKeyword)) {
+                        keywordScore += 1;
+                        portfolioMatched = true;
+                    }
+
+                    // 포트폴리오 설명 매칭
+                    if (!portfolioMatched && portfolio.getDescription() != null && 
+                        portfolio.getDescription().toLowerCase().contains(lowerKeyword)) {
+                        keywordScore += 1;
+                        portfolioMatched = true;
+                    }
+
+                    // 포트폴리오 디자인 카테고리 매칭
+                    if (!portfolioMatched && portfolio.getDesignCategories() != null) {
+                        for (PortfolioDesignCategory portfolioDesignCategory : portfolio.getDesignCategories()) {
+                            DesignCategory category = portfolioDesignCategory.getDesignCategory();
+                            if (category.name().toLowerCase().contains(lowerKeyword) || 
+                                category.getDescription().toLowerCase().contains(lowerKeyword)) {
+                                keywordScore += 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (keywordScore > 0) {
+                totalScore += keywordScore;
+                matchedKeywords.add(keyword);
+            }
+        }
+
+        // RecommendedDesignerDto 생성
+        RecommendedDesignerDto designerDto = convertToRecommendedDesignerDto(designer);
+
+        // ScoredDesignerDto 생성
+        return new ScoredDesignerDto(designerDto, totalScore, matchedKeywords);
     }
 }
