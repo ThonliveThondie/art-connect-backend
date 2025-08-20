@@ -95,6 +95,15 @@ jwt:
     expiration: ${JWT_REFRESH_EXPIRATION:1209600000}
     header: Authorization-refresh
 
+# 서버 설정 (HTTPS)
+server:
+  ssl:
+    enabled: true
+    key-store: classpath:keystore.p12
+    key-store-type: PKCS12
+    key-store-password: ${SSL_KEYSTORE_PASSWORD}
+    key-alias: tomcat
+
 # 로깅 설정
 logging:
   level:
