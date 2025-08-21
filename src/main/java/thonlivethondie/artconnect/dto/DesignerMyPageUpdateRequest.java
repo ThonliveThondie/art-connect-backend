@@ -12,7 +12,7 @@ import java.util.List;
  * 기본 정보 + 디자이너 전용 필드 포함
  */
 public record DesignerMyPageUpdateRequest(
-        String nickName,
+        String nickname,
         String phoneNumber,
         String education,
         String major,

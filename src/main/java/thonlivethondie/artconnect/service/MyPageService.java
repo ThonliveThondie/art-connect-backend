@@ -68,7 +68,7 @@ public class MyPageService {
             throw new IllegalArgumentException("소상공인이 아닌 사용자는 이 기능을 사용할 수 없습니다.");
         }
 
-        user.updateBasicInfo(request.nickName(), request.phoneNumber());
+        user.updateBasicInfo(request.nickname(), request.phoneNumber());
     }
 
     private User findUserById(Long userId) {
@@ -78,7 +78,7 @@ public class MyPageService {
 
     private void updateDesignerInfo(User user, DesignerMyPageUpdateRequest request) {
         // 기본 정보 업데이트
-        user.updateBasicInfo(request.nickName(), request.phoneNumber());
+        user.updateBasicInfo(request.nickname(), request.phoneNumber());
 
         // 디자이너 전용 정보(대학, 전공) 업데이트
         user.updateDesignerInfo(request.education(), request.major());

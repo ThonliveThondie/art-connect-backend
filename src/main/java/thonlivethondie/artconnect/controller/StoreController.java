@@ -25,10 +25,10 @@ public class StoreController {
 
     private final StoreService storeService;
 
-    // 매장명 저장/수정
+    // 매장 정보 저장/수정
     @PostMapping({
             "/save/name",
-            "/save/address",
+            "/save/type",
             "/save/phone-number",
             "/save/operating-hours"
     })

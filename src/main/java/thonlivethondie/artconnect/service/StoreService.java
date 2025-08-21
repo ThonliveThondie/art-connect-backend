@@ -9,10 +9,12 @@ import thonlivethondie.artconnect.common.UserType;
 import thonlivethondie.artconnect.common.exception.BadRequestException;
 import thonlivethondie.artconnect.common.exception.ErrorCode;
 
+import thonlivethondie.artconnect.common.OperatingHours;
 import thonlivethondie.artconnect.dto.StoreResponseDto;
 import thonlivethondie.artconnect.dto.StoreUpdateRequestDto;
 import thonlivethondie.artconnect.entity.Store;
 import thonlivethondie.artconnect.entity.StoreImage;
+import thonlivethondie.artconnect.entity.StoreOperatingHours;
 import thonlivethondie.artconnect.entity.User;
 import thonlivethondie.artconnect.repository.StoreImageRepository;
 import thonlivethondie.artconnect.repository.StoreRepository;
@@ -48,23 +50,33 @@ public class StoreService {
                 }
             }
 
+            // 운영시간 엔티티 변환
+            List<StoreOperatingHours> operatingHoursList = convertToStoreOperatingHours(store, dto.operatingHours());
+
             // 필드별 업데이트 (null이 아닌 값만)
-            store.updateStoreInfo(dto.storeName(), dto.address(), dto.phoneNumber(), dto.operatingHours());
+            store.updateStoreInfo(dto.storeName(), dto.storeType(), dto.phoneNumber(), operatingHoursList);
         } else {
             // 매장명 중복 검증
             if (dto.storeName() != null && storeRepository.existsByStoreName(dto.storeName())) {
                 throw new BadRequestException(ErrorCode.DUPLICATE_STORE_NAME);
             }
 
+            // 1. 먼저 Store 엔티티 생성 및 저장
             store = Store.builder()
                     .user(user)
                     .storeName(dto.storeName())
+                    .storeType(dto.storeType())
                     .phoneNumber(dto.phoneNumber())
-                    .address(dto.address())
-                    .operatingHours(dto.operatingHours())
                     .build();
 
             store = storeRepository.save(store);
+
+            // 2. Store 저장 후 운영시간 설정
+            if (dto.operatingHours() != null && !dto.operatingHours().isEmpty()) {
+                List<StoreOperatingHours> operatingHoursList = convertToStoreOperatingHours(store, dto.operatingHours());
+                store.setOperatingHours(operatingHoursList);
+                store = storeRepository.save(store); // 운영시간과 함께 다시 저장
+            }
         }
 
         return StoreResponseDto.from(store);
@@ -194,5 +206,21 @@ public class StoreService {
             return "";
         }
         return imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+    }
+
+    /**
+     * OperatingHours 열거형을 StoreOperatingHours 엔티티로 변환
+     */
+    private List<StoreOperatingHours> convertToStoreOperatingHours(Store store, List<OperatingHours> operatingHours) {
+        if (operatingHours == null || operatingHours.isEmpty()) {
+            return List.of();
+        }
+
+        return operatingHours.stream()
+                .map(operatingHour -> StoreOperatingHours.builder()
+                        .store(store)
+                        .operatingHours(operatingHour)
+                        .build())
+                .toList();
     }
 }
