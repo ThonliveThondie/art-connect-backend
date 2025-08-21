@@ -9,23 +9,26 @@ import java.util.List;
 public record StoreResponseDto(
         Long storeId,
         String storeName,
-        String address,
+        String storeType,
         String phoneNumber,
-        String operatingHours,
+        List<String> operatingHours,
         List<StoreImageDto> storeImages
 ) {
     public StoreResponseDto {
         // 불변성을 위한 방어적 복사
         storeImages = storeImages != null ? List.copyOf(storeImages) : List.of();
+        operatingHours = operatingHours != null ? List.copyOf(operatingHours) : List.of();
     }
     
     public static StoreResponseDto from(Store store) {
         return StoreResponseDto.builder()
                 .storeId(store.getId())
                 .storeName(store.getStoreName())
-                .address(store.getAddress())
+                .storeType(store.getStoreType())
                 .phoneNumber(store.getPhoneNumber())
-                .operatingHours(store.getOperatingHours())
+                .operatingHours(store.getStoreOperatingHours().stream()
+                        .map(operatingHour -> operatingHour.getOperatingHours().name())
+                        .toList())
                 .storeImages(store.getStoreImages().stream()
                         .map(StoreImageDto::from)
                         .toList())

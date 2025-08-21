@@ -42,7 +42,7 @@ public class WorkRequest extends BaseEntity {
     private String projectTitle;
 
     // 업체명 (매장명 가져오기)
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
