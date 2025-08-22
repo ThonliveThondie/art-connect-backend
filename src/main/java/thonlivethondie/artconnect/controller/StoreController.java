@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import thonlivethondie.artconnect.dto.StoreNameResponseDto;
 import thonlivethondie.artconnect.dto.StoreResponseDto;
 import thonlivethondie.artconnect.dto.StoreUpdateRequestDto;
 import thonlivethondie.artconnect.service.StoreService;
@@ -92,6 +93,17 @@ public class StoreController {
         log.info("매장 이미지 삭제 요청 - userId: {}, imageId: {}", userId, imageId);
 
         StoreResponseDto response = storeService.deleteStoreImage(userId, imageId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/store-name")
+    public ResponseEntity<StoreNameResponseDto> getStoreNameForBusinessOwner(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+        StoreNameResponseDto response = storeService.getMyStoreName(userId);
 
         return ResponseEntity.ok(response);
     }

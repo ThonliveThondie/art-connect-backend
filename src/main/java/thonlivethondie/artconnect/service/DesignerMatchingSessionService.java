@@ -83,7 +83,7 @@ public class DesignerMatchingSessionService {
     }
 
     /**
-     * 세션에서 새로고침된 디자이너 2명을 랜덤으로 반환합니다.
+     * 세션에서 새로고침된 디자이너 1명을 랜덤으로 반환합니다.
      *
      * @param sessionId 세션 ID
      * @return 새로고침된 추천 디자이너 목록
@@ -102,16 +102,16 @@ public class DesignerMatchingSessionService {
                 .filter(scored -> !session.getReturnedDesignerIds().contains(scored.getDesigner().getUserId()))
                 .collect(Collectors.toList());
 
-        // 사용 가능한 디자이너가 2명 미만이면 전체 목록에서 랜덤 선택
-        if (availableDesigners.size() < 2) {
+        // 사용 가능한 디자이너가 1명 미만이면 전체 목록에서 랜덤 선택
+        if (availableDesigners.size() < 1) {
             availableDesigners = new ArrayList<>(allDesigners);
             log.info("사용 가능한 디자이너가 부족하여 전체 목록에서 선택 - 세션 ID: {}", sessionId);
         }
 
-        // 랜덤하게 2명 선택
+        // 랜덤하게 1명 선택
         Collections.shuffle(availableDesigners);
         List<RecommendedDesignerDto> refreshedRecommendations = availableDesigners.stream()
-                .limit(2)
+                .limit(1)
                 .map(ScoredDesignerDto::getDesigner)
                 .collect(Collectors.toList());
 
