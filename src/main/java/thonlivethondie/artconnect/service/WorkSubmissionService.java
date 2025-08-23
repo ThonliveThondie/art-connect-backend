@@ -126,6 +126,7 @@ public class WorkSubmissionService {
         
         return new WorkSubmissionListResponseDto(
                 workRequest.getId(),
+                workRequest.getStatus(),
                 workRequest.getProjectTitle(),
                 workRequest.getStore().getStoreName(),
                 workRequest.getDesigner().getNickname(),
@@ -249,6 +250,7 @@ public class WorkSubmissionService {
                 workSubmission.getComment(),
                 workSubmission.getStoreName(),
                 workSubmission.getDesignerName(),
+                workSubmission.getDesignerProfileImageUrl(),
                 workSubmission.getEndDate(),
                 workSubmission.getCreateDate(),
                 imageDtos,
@@ -267,6 +269,7 @@ public class WorkSubmissionService {
                 workSubmission.getComment(),
                 workSubmission.getStoreName(),
                 workSubmission.getDesignerName(),
+                workSubmission.getDesignerProfileImageUrl(),
                 workSubmission.getEndDate(),
                 workSubmission.getCreateDate(),
                 images,
@@ -305,6 +308,7 @@ public class WorkSubmissionService {
                 workSubmission.getComment(),
                 workSubmission.getStoreName(),
                 workSubmission.getDesignerName(),
+                workSubmission.getDesignerProfileImageUrl(),
                 workSubmission.getEndDate(),
                 workSubmission.getCreateDate(),
                 imageDtos,

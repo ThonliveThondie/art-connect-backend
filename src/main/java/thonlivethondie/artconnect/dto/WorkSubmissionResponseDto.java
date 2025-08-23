@@ -12,6 +12,7 @@ public record WorkSubmissionResponseDto(
     String comment,
     String storeName,
     String designerName,
+    String designerProfileImageUrl,
     LocalDate endDate,
     LocalDateTime createdAt,
     List<WorkSubmissionImageDto> images,

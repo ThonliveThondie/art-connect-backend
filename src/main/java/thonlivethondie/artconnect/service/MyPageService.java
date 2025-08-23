@@ -68,7 +68,7 @@ public class MyPageService {
             throw new IllegalArgumentException("소상공인이 아닌 사용자는 이 기능을 사용할 수 없습니다.");
         }
 
-        user.updateBasicInfo(request.nickname(), request.phoneNumber());
+        user.updatePhoneNumber(request.phoneNumber());
     }
 
     private User findUserById(Long userId) {

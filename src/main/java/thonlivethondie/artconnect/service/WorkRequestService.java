@@ -195,6 +195,23 @@ public class WorkRequestService {
     }
 
     /**
+     * 디자이너가 받은 특정 작업의뢰서 조회
+     */
+    public WorkRequestResponseDto getOneWorkRequestForDesigner(Long requestId, Long designerId) {
+        User designer = validateDesigner(designerId);
+
+        WorkRequest workRequest = workRequestRepository.findById(requestId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.WORK_REQUEST_NOT_FOUND));
+
+        // 디자이너 본인이 받은 의뢰서인지 검증
+        if (!workRequest.getDesigner().getId().equals(designerId)) {
+            throw new BadRequestException(ErrorCode.WORK_REQUEST_ACCESS_DENIED);
+        }
+
+        return WorkRequestResponseDto.from(workRequest);
+    }
+
+    /**
      * 소상공인이 보낸 의뢰서 목록 조회
      */
     public List<WorkRequestResponseDto> getWorkRequestsForBusinessOwner(Long businessOwnerId) {
@@ -208,13 +225,31 @@ public class WorkRequestService {
     }
 
     /**
+     * 소상공인이 보낸 특정 작업의뢰서 조회
+     */
+    public WorkRequestResponseDto getOneWorkRequestForBusinessOwner(Long requestId, Long businessOwnerId) {
+        User businessOwner = validateBusinessOwner(businessOwnerId);
+
+        WorkRequest workRequest = workRequestRepository.findById(requestId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.WORK_REQUEST_NOT_FOUND));
+
+        // 소상공인 본인이 보낸 의뢰서인지 검증
+        if (!workRequest.getBusinessOwner().getId().equals(businessOwnerId)) {
+            throw new BadRequestException(ErrorCode.WORK_REQUEST_ACCESS_DENIED);
+        }
+
+        return WorkRequestResponseDto.from(workRequest);
+    }
+
+    /**
      * 디자이너가 받은 의뢰서 간소화된 목록 조회
      * 목록 조회 시 필요한 핵심 정보만 반환 (프로젝트 제목, 매장명, 예산)
      */
     public List<WorkRequestSimpleDto> getSimpleWorkRequestsForDesigner(Long designerId) {
         User designer = validateDesigner(designerId);
 
-        List<WorkRequest> workRequests = workRequestRepository.findByDesignerOrderByCreateDateDesc(designer);
+        List<WorkRequest> workRequests = workRequestRepository.findByDesignerAndStatusInOrderByCreateDateDesc(
+                designer, List.of(WorkRequestStatus.PROPOSAL));
 
         return workRequests.stream()
                 .map(WorkRequestSimpleDto::from)

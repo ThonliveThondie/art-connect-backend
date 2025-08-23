@@ -10,6 +10,7 @@ import thonlivethondie.artconnect.common.exception.BadRequestException;
 import thonlivethondie.artconnect.common.exception.ErrorCode;
 
 import thonlivethondie.artconnect.common.OperatingHours;
+import thonlivethondie.artconnect.dto.StoreNameResponseDto;
 import thonlivethondie.artconnect.dto.StoreResponseDto;
 import thonlivethondie.artconnect.dto.StoreUpdateRequestDto;
 import thonlivethondie.artconnect.entity.Store;
@@ -222,5 +223,11 @@ public class StoreService {
                         .operatingHours(operatingHour)
                         .build())
                 .toList();
+    }
+
+    public StoreNameResponseDto getMyStoreName(Long userId) {
+        Store store = getStoreByUserId(userId);
+
+        return new StoreNameResponseDto(store.getStoreName());
     }
 }

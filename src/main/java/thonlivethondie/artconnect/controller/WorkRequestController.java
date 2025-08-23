@@ -73,6 +73,18 @@ public class WorkRequestController {
         return ResponseEntity.ok(workRequests);
     }
 
+    @GetMapping("/designer/{requestId}")
+    public ResponseEntity<WorkRequestResponseDto> getOneWorkRequestForDesigner(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+        WorkRequestResponseDto workRequest = workRequestService.getOneWorkRequestForDesigner(requestId, userId);
+
+        return ResponseEntity.ok(workRequest);
+    }
+
     /**
      * 소상공인이 보낸 의뢰서 목록 조회
      */
@@ -86,6 +98,18 @@ public class WorkRequestController {
         List<WorkRequestResponseDto> workRequests = workRequestService.getWorkRequestsForBusinessOwner(userId);
 
         return ResponseEntity.ok(workRequests);
+    }
+
+    @GetMapping("/business-owner/{requestId}")
+    public ResponseEntity<WorkRequestResponseDto> getOneWorkRequestForBusinessOwner(
+            @PathVariable Long requestId,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        Long userId = Long.parseLong(userDetails.getUsername());
+
+        WorkRequestResponseDto workRequest = workRequestService.getOneWorkRequestForBusinessOwner(requestId, userId);
+
+        return ResponseEntity.ok(workRequest);
     }
 
     /**

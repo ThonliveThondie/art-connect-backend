@@ -146,6 +146,12 @@ public class User extends BaseEntity {
         }
     }
 
+    public void updatePhoneNumber(String phoneNumber) {
+        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            this.phoneNumber = phoneNumber;
+        }
+    }
+
     public void updateNickname(String nickname) {
         if (nickname != null && !nickname.trim().isEmpty()) {
             this.nickname = nickname;

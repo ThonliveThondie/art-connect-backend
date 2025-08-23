@@ -1,5 +1,7 @@
 package thonlivethondie.artconnect.dto;
 
+import thonlivethondie.artconnect.common.WorkRequestStatus;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import java.util.List;
  */
 public record WorkSubmissionListResponseDto(
     Long workRequestId,
+    WorkRequestStatus status,
     String projectTitle,
     String storeName,
     String designerName,
