@@ -48,6 +48,10 @@ public class WorkSubmission extends BaseTimeEntity {
         return this.workRequest.getEndDate();
     }
 
+    public String getDesignerProfileImageUrl() {
+        return this.workRequest.getDesigner().getImageUrl();
+    }
+
     @Builder
     public WorkSubmission(String comment, WorkRequest workRequest) {
         this.comment = comment;

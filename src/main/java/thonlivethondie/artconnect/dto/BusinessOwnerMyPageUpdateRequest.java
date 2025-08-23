@@ -5,7 +5,6 @@ package thonlivethondie.artconnect.dto;
  * 기본 정보만 포함
  */
 public record BusinessOwnerMyPageUpdateRequest(
-        String nickname,
         String phoneNumber
 ) {
 }
