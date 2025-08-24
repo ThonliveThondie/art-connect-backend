@@ -190,6 +190,48 @@ public class PortfolioService {
     }
 
     /**
+     * 소상공인용 - 특정 디자이너의 포트폴리오 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<PortfolioResponseDto> getDesignerPortfolios(Long designerId) {
+        // 디자이너가 존재하는지 확인
+        validateDesigner(designerId);
+
+        // 디자이너의 공개 포트폴리오만 조회
+        List<Portfolio> portfolios = portfolioRepository.findByDesignerId(designerId);
+
+        // 각 포트폴리오에 대해 이미지와 카테고리를 별도로 로드
+        portfolios.forEach(this::loadPortfolioImagesAndCategories);
+
+        return portfolios.stream()
+                .map(PortfolioResponseDto::from)
+                .toList();
+    }
+
+    /**
+     * 소상공인용 - 특정 디자이너의 특정 포트폴리오 조회
+     */
+    @Transactional(readOnly = true)
+    public PortfolioResponseDto getDesignerPortfolio(Long designerId, Long portfolioId) {
+        // 디자이너가 존재하는지 확인
+        validateDesigner(designerId);
+
+        // 포트폴리오 조회 및 권한 확인
+        Portfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new BadRequestException(ErrorCode.PORTFOLIO_NOT_FOUND));
+        
+        // 해당 포트폴리오가 요청한 디자이너의 것인지 확인
+        if (!portfolio.getDesigner().getId().equals(designerId)) {
+            throw new BadRequestException(ErrorCode.PORTFOLIO_NOT_FOUND);
+        }
+
+        // 이미지와 카테고리 로드
+        loadPortfolioImagesAndCategories(portfolio);
+
+        return PortfolioResponseDto.from(portfolio);
+    }
+
+    /**
      * 포트폴리오 삭제
      */
     public void deletePortfolio(Long userId, Long portfolioId) {

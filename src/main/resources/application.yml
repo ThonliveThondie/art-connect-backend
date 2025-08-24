@@ -9,6 +9,7 @@ spring:
         options:
           model: ${local-ai.anthropic.claude.chat.options.model}
           temperature: ${local-ai.anthropic.claude.chat.options.temperature}
+          max-tokens: ${local-ai.anthropic.claude.chat.options.max-tokens}
 
   profiles:
     default: local
