@@ -149,4 +149,23 @@ public class AiController {
             throw e; // GlobalExceptionHandler에서 처리하도록 예외를 다시 던짐
         }
     }
+
+    @PostMapping("/generate-work-request/{sessionId}")
+    public ResponseEntity<WorkRequestCreateRequestDto> generateWorkRequestFromSession(
+            @PathVariable String sessionId) {
+
+        log.info("세션 기반 작업의뢰서 자동 생성 요청 - 세션 ID: {}", sessionId);
+
+        try {
+            // 세션 ID를 기반으로 AI 제안 정보를 활용하여 작업의뢰서 생성
+            WorkRequestCreateRequestDto workRequest = aiRecommendationService.generateWorkRequestFromSession(sessionId);
+
+            log.info("작업의뢰서 자동 생성 완료 - 세션 ID: {}, 프로젝트명: {}", sessionId, workRequest.projectTitle());
+
+            return ResponseEntity.ok(workRequest);
+        } catch (Exception e) {
+            log.error("작업의뢰서 자동 생성 중 오류 발생 - 세션 ID: {}", sessionId, e);
+            throw e;
+        }
+    }
 }
