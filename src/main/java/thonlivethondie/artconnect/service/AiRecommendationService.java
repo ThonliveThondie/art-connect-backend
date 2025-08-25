@@ -179,6 +179,11 @@ public class AiRecommendationService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String minEndDateStr = minEndDate.format(formatter);
         String maxEndDateStr = maxEndDate.format(formatter);
+
+        // 제안 금액 범위
+        String minBudget = "500000";
+        String maxBudget = "1000000";
+        String exampleBudget = "510000";
         
         return """
                 당신은 디자인을 의뢰하는 클라이언트의 관점에서 작업의뢰서를 작성합니다.
@@ -193,7 +198,9 @@ public class AiRecommendationService {
                    사용 가능한 날짜 범위: %s ~ %s
                    예시: "%s"
                 
-                3. budget: 적절한 예산 (원 단위, 예: 3000000)
+                3. budget: 적절한 예산 (원 단위, 예: 510000)
+                   사용 가능한 금액 범위: %s ~ %s
+                   예시: "%s"
                 
                 4. productService: 사업체/제품을 친근하게 소개 (최대 100자)
                    예시: "따뜻한 분위기의 빈티지 콘셉트 카페입니다"
@@ -227,7 +234,7 @@ public class AiRecommendationService {
                 - designCategories는 반드시 위 목록의 정확한 값만 사용
                 - JSON을 완전하게 닫기
                 """.formatted(minEndDateStr, maxEndDateStr, currentDate.plusDays(14).format(formatter),
-                availableCategories, outputFormat, minEndDateStr, maxEndDateStr);
+                minBudget, maxBudget, exampleBudget, availableCategories, outputFormat, minEndDateStr, maxEndDateStr);
     }
 
     /**

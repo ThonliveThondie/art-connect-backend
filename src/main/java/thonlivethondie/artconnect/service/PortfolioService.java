@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import thonlivethondie.artconnect.common.UserType;
 import thonlivethondie.artconnect.common.exception.BadRequestException;
 import thonlivethondie.artconnect.common.exception.ErrorCode;
+import thonlivethondie.artconnect.dto.DesignerPortfolioResponseDto;
 import thonlivethondie.artconnect.dto.PortfolioRequestDto;
 import thonlivethondie.artconnect.dto.PortfolioResponseDto;
 import thonlivethondie.artconnect.entity.Portfolio;
@@ -191,11 +192,17 @@ public class PortfolioService {
 
     /**
      * 소상공인용 - 특정 디자이너의 포트폴리오 목록 조회
+     * 디자이너 정보(education, major, speciality, designStyles)와 포트폴리오 목록을 함께 조회
      */
     @Transactional(readOnly = true)
-    public List<PortfolioResponseDto> getDesignerPortfolios(Long designerId) {
-        // 디자이너가 존재하는지 확인
-        validateDesigner(designerId);
+    public DesignerPortfolioResponseDto getDesignerPortfolios(Long designerId) {
+        // 디자이너가 존재하는지 확인하고 디자이너 정보 조회
+        User designer = validateDesigner(designerId);
+
+        // 디자이너의 연관 데이터를 지연 로딩으로 미리 로드
+        // (트랜잭션이 끝나기 전에 로드해야 함)
+        designer.getSelectedSpecialities(); // speciality 로드
+        designer.getSelectedDesignStyles(); // designStyleCategories 로드
 
         // 디자이너의 공개 포트폴리오만 조회
         List<Portfolio> portfolios = portfolioRepository.findByDesignerId(designerId);
@@ -203,9 +210,7 @@ public class PortfolioService {
         // 각 포트폴리오에 대해 이미지와 카테고리를 별도로 로드
         portfolios.forEach(this::loadPortfolioImagesAndCategories);
 
-        return portfolios.stream()
-                .map(PortfolioResponseDto::from)
-                .toList();
+        return DesignerPortfolioResponseDto.of(designer, portfolios);
     }
 
     /**
