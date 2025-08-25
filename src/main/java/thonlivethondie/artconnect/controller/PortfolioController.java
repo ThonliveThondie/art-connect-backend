@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import thonlivethondie.artconnect.dto.DesignerPortfolioResponseDto;
 import thonlivethondie.artconnect.dto.PortfolioRequestDto;
 import thonlivethondie.artconnect.dto.PortfolioResponseDto;
 import thonlivethondie.artconnect.service.PortfolioService;
@@ -88,18 +89,16 @@ public class PortfolioController {
 
     /**
      * 소상공인용 - 특정 디자이너의 포트폴리오 목록 조회
+     * 디자이너 정보(education, major, speciality, designStyles)와 포트폴리오 목록을 함께 제공
      */
     @GetMapping("/designer/{designerId}")
-    public ResponseEntity<List<PortfolioResponseDto>> getDesignerPortfolios(
+    public ResponseEntity<DesignerPortfolioResponseDto> getDesignerPortfolios(
             @PathVariable Long designerId,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        // UserDetails에서 userId 추출
-        Long userId = Long.parseLong(userDetails.getUsername());
+        DesignerPortfolioResponseDto designerPortfolios = portfolioService.getDesignerPortfolios(designerId);
 
-        List<PortfolioResponseDto> portfolios = portfolioService.getDesignerPortfolios(designerId);
-
-        return ResponseEntity.ok(portfolios);
+        return ResponseEntity.ok(designerPortfolios);
     }
 
     /**
@@ -110,9 +109,6 @@ public class PortfolioController {
             @PathVariable Long designerId,
             @PathVariable Long portfolioId,
             @AuthenticationPrincipal UserDetails userDetails) {
-
-        // UserDetails에서 userId 추출
-        Long userId = Long.parseLong(userDetails.getUsername());
 
         PortfolioResponseDto portfolio = portfolioService.getDesignerPortfolio(designerId, portfolioId);
 
