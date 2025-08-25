@@ -12,7 +12,7 @@ spring:
       hibernate:
         format_sql: false
         highlight_sql: false
-        hbm2ddl.auto: create  # 프로덕션에서는 validate 사용
+        hbm2ddl.auto: update
         default_batch_fetch_size: 100
     show-sql: false
     open-in-view: false
