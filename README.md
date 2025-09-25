@@ -3,13 +3,14 @@
 
 # 📜 아키텍처 설계 & API 명세서
 주요 아키텍처 설계와 API 명세서는 노션에 별도로 작성하였습니다.
+> 노션 아이콘을 누르면 페이지로 연결됩니다.
 
-- <a href="https://accidental-radon-18f.notion.site/2736fd8c80d28150ab99d9337d4aab51?v=2736fd8c80d281f8b144000c62cdc71a">
-      <img src="https://img.shields.io/badge/ArtConnect Architecture Docs-000000?style=flat-square&logo=Notion&logoColor=white"/>
+<a href="https://accidental-radon-18f.notion.site/2736fd8c80d28150ab99d9337d4aab51?v=2736fd8c80d281f8b144000c62cdc71a">
+      <img src="https://img.shields.io/badge/ArtConnect Architecture Docs-000000?style=for-the-badge&logo=Notion&logoColor=white"/>
 </a>
 
-- <a href="https://accidental-radon-18f.notion.site/2736fd8c80d2812ab198dc74f611e10b?v=2736fd8c80d2812bb858000ca48edfb3&pvs=74">
-      <img src="https://img.shields.io/badge/ArtConnect API Docs-000000?style=flat-square&logo=Notion&logoColor=white"/>
+<a href="https://accidental-radon-18f.notion.site/2736fd8c80d2812ab198dc74f611e10b?v=2736fd8c80d2812bb858000ca48edfb3&pvs=74">
+      <img src="https://img.shields.io/badge/ArtConnect API Docs-000000?style=for-the-badge&logo=Notion&logoColor=white"/>
 </a>
 
 # ✒️ 프로젝트 구조
@@ -19,7 +20,7 @@
 <img width="1804" height="1392" alt="ERD 다이어그램" src="https://github.com/user-attachments/assets/29b605b8-c565-4526-9ca9-b7cc5b1bf386" />
 
 # ⚙️ 기술 스택
-<img src="https://img.shields.io/badge/JAVA-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"/> <img src="https://img.shields.io/badge/AWS EC2-F58534?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img src="https://img.shields.io/badge/AWS RDS-2E73B8?style=for-the-badge&logo=amazonwebservices&logoColor=white"/>
+<img src="https://img.shields.io/badge/JAVA-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/Spring Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white"> <img src="https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white"/> <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/> <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=MySQL&logoColor=white"/> <img src="https://img.shields.io/badge/AWS EC2-F58534?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img src="https://img.shields.io/badge/AWS RDS-2E73B8?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img src="https://img.shields.io/badge/AWS S3-E05243?style=for-the-badge&logo=amazonwebservices&logoColor=white"/> <img src="https://img.shields.io/badge/Anthropic AI-191919?style=for-the-badge&logo=anthropic&logoColor=white"/>
 
 # ✋ 시작 가이드
 > 아래에 내용에 해당하는 시작 가이드는 단순히 로컬 환경에서 서버를 실행해보기 위한 내용입니다.
